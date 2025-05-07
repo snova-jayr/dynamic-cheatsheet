@@ -6,6 +6,7 @@ from .utils.execute_code import extract_and_run_python_code
 from .utils.extractor import extract_answer, extract_cheatsheet
 from litellm import completion
 from functools import partial
+from transformers import AutoModelForCausalLM, AutoTokenizer
 
 class LanguageModel:
     def __init__(self,
@@ -48,14 +49,18 @@ class LanguageModel:
             "together_ai/Qwen/Qwen2.5-72B-Instruct-Turbo",
             "gemini/gemini-2.0-flash",
             "ollama/llama3:70b",
+            "sambanova/Meta-Llama-3.3-70B-Instruct",
+            "sambanova/DeepSeek-R1",
+            "sambanova/Meta-Llama-3.1-405B-Instruct",
+            "sambanova/Llama-4-Maverick-17B-128E-Instruct",
         ]:
             self.client = partial(completion, model=self.model_name)
         else:
-            raise ValueError(f"Model '{model_name}' not found.")
+            self.client = None
+            self.model_hf = AutoModelForCausalLM.from_pretrained(self.model_name, device_map='auto')
+            self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
         
         self.gpt4Tokenizer = tiktoken.encoding_for_model('gpt-4o')
-        
-
     def count_tokens(self, text: str) -> int:
         """
         Count the number of tokens in the text.
@@ -65,7 +70,7 @@ class LanguageModel:
 
     def generate(self,
         history: List[str],
-        temperature: float = 0.1,
+        temperature: float = 0.00000001,
         max_tokens: int = 2048,
         current_depth: int = 1,
         max_depth_num_rounds: int = 3,
@@ -95,14 +100,18 @@ class LanguageModel:
         if len(history) == 0:
             raise ValueError("History must contain at least one message.")
         
-
+        if self.client is None:
+            chat_input = self.tokenizer.apply_chat_template(history, return_tensors="pt")
+            generate = self.model_hf.generate(chat_input, temperature=temperature, max_new_tokens=max_tokens)
+            output = self.tokenizer.decode(generate[0], skip_special_tokens=True)
         # Generate the response from the language model
-        output = self.client(
-            messages=history,
-            model=self.model_name,
-            temperature=temperature,
-            max_completion_tokens=max_tokens,
-        ).choices[0].message["content"]
+        else:
+            output = self.client(
+                messages=history,
+                model=self.model_name,
+                temperature=temperature,
+                max_completion_tokens=max_tokens,
+            ).choices[0].message["content"]
 
         # If Python code execution is allowed, execute the code
         pre_code_execution_flag = output.split(code_execution_flag)[0].strip()
@@ -154,7 +163,7 @@ class LanguageModel:
         cheatsheet: str = None,
         generator_template: str = None,
         cheatsheet_template: str = None,
-        temperature: float = 0.0,
+        temperature: float = 0.00000001,
         max_tokens: int = 2048,
         max_num_rounds: int = 1,
         allow_code_execution: bool = True,
