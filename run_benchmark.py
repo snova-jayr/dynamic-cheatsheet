@@ -3,9 +3,9 @@ import json
 import os
 import pandas as pd
 import numpy as np
+import argparse
 
 from datasets import load_dataset, load_from_disk
-from tap import Tap
 from dynamic_cheatsheet.language_model import LanguageModel
 from dynamic_cheatsheet.utils.evaluation import eval_for_GameOf24, eval_for_multiple_choice, eval_for_exact_matching_with_no_punctuation, eval_equation_balancer
 
@@ -15,41 +15,48 @@ PREDEFINED_PROMPTS = {
     "GameOf24": f"Let's play a game called 24. You'll be given four integers, and your objective is to use each number only once, combined with any of the four arithmetic operations (addition, subtraction, multiplication, and division) and parentheses, to achieve a total of 24. For example, if the input is 4, 7, 8, and 8, the output could be (7 - (8 / 8)) * 4 = 24. Please present a single expression that evaluates to 24.",
 }
 
-class Arguments(Tap):
+def parse_arguments():
     """
-    Arguments to the pass to the program.
+    Parse command-line arguments using argparse.
     """
+    parser = argparse.ArgumentParser(description="Arguments to pass to the program.")
+
     # Task name
-    task: str = "GameOf24"
-    
+    parser.add_argument("--task", type=str, default="GameOf24", help="Task name")
+
     # Approach name
-    approach_name: str = "DynamicCheatsheet_Cumulative"
+    parser.add_argument("--approach_name", type=str, default="DynamicCheatsheet_Cumulative", help="Approach name")
 
     # Model name
-    model_name: str = "openai/gpt-4o-mini"
+    parser.add_argument("--model_name", type=str, default="openai/gpt-4o-mini", help="Model name")
 
     # Paths to the prompt files
-    generator_prompt_path: str = "prompts/simple_generator.txt"
-    cheatshet_prompt_path: str = None
+    parser.add_argument("--generator_prompt_path", type=str, default="prompts/simple_generator.txt", help="Path to the generator prompt file")
+    parser.add_argument("--cheatsheet_prompt_path", type=str, default=None, help="Path to the cheatsheet prompt file")
 
     # Additional model-related arguments
-    max_tokens: int = 2048
-    temperature: float = 0.0
-    max_num_rounds: int = 1
+    parser.add_argument("--max_tokens", type=int, default=2048, help="Maximum number of tokens")
+    parser.add_argument("--temperature", type=float, default=0.0, help="Temperature for generation")
+    parser.add_argument("--max_num_rounds", type=int, default=1, help="Maximum number of rounds")
 
-    execute_python_code: bool = True
-    initialize_cheatsheet_path: str = None
-    retrieve_top_k: int = 3
+    # Execution flags
+    parser.add_argument("--execute_python_code", action="store_true", help="Allow Python code execution")
+    parser.add_argument("--initialize_cheatsheet_path", type=str, default=None, help="Path to initialize the cheatsheet")
+    parser.add_argument("--retrieve_top_k", type=int, default=3, help="Top-k retrieval for dynamic approaches")
 
     # Continue from the previous run
-    continue_from_last_run_path: str = None
+    parser.add_argument("--continue_from_last_run_path", type=str, default=None, help="Path to continue from the last run")
 
     # Additional save-path-related arguments
-    save_directory: str = "results"
-    additional_flag_for_save_path: str = ""
-    max_n_samples: int = -1
-    no_shuffle: bool = False
+    parser.add_argument("--save_directory", type=str, default="results", help="Directory to save results")
+    parser.add_argument("--additional_flag_for_save_path", type=str, default="", help="Additional flag for the save path")
+    parser.add_argument("--max_n_samples", type=int, default=-1, help="Maximum number of samples to process")
+    parser.add_argument("--no_shuffle", action="store_true", help="Disable shuffling of the dataset")
 
+    args = parser.parse_args()
+
+    # Convert to a dictionary for compatibility with the rest of the code
+    return args
 
 def read_file(file_path: str) -> str:
     """
@@ -71,7 +78,7 @@ def write_jsonl(file_path, data):
             file.write(json.dumps(line) + "\n")
 
 
-def main(args: Arguments):
+def main(args):
     """
     Main function to run the benchmark.
     """
@@ -80,8 +87,8 @@ def main(args: Arguments):
 
     # Read the prompt files
     args.generator_prompt = read_file(args.generator_prompt_path)
-    if args.cheatshet_prompt_path:
-        args.cheatsheet_prompt = read_file(args.cheatshet_prompt_path)
+    if args.cheatsheet_prompt_path:
+        args.cheatsheet_prompt = read_file(args.cheatsheet_prompt_path)
     else:
         args.cheatsheet_prompt = "(empty)"
 
@@ -118,7 +125,7 @@ def main(args: Arguments):
             previous_run_params = json.load(file)
 
         # Compare the provided arguments with the previous run parameters
-        args_keys = ["generator_prompt_path", "cheatshet_prompt_path", "temperature", "execute_python_code", "task", "model_name", "approach_name", "max_num_rounds"]
+        args_keys = ["generator_prompt_path", "cheatsheet_prompt_path", "temperature", "execute_python_code", "task", "model_name", "approach_name", "max_num_rounds"]
 
         # Compare the provided arguments with the previous run parameters
         for key in args_keys:
@@ -142,7 +149,7 @@ def main(args: Arguments):
     
     # Save the arguments to a file
     with open(save_param_path, "w") as file:
-        json.dump(args.as_dict(), file, indent=4)
+        json.dump(vars(args), file, indent=4)
 
     # Initialize the cheatsheet
     cheatsheet = "(empty)"
@@ -294,5 +301,5 @@ def main(args: Arguments):
 
         
 if __name__ == "__main__":
-    args = Arguments().parse_args()
+    args = parse_arguments()
     main(args)
