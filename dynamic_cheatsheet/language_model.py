@@ -4,9 +4,11 @@ from typing import List, Tuple
 from sklearn.metrics.pairwise import cosine_similarity
 from .utils.execute_code import extract_and_run_python_code
 from .utils.extractor import extract_answer, extract_cheatsheet
+import litellm
 from litellm import completion
 from functools import partial
 from transformers import AutoModelForCausalLM, AutoTokenizer
+litellm.drop_params=True
 
 class LanguageModel:
     def __init__(self,
@@ -53,6 +55,7 @@ class LanguageModel:
             "sambanova/DeepSeek-R1",
             "sambanova/Meta-Llama-3.1-405B-Instruct",
             "sambanova/Llama-4-Maverick-17B-128E-Instruct",
+            "sambanova/Qwen3-32B",
         ]:
             self.client = partial(completion, model=self.model_name)
         else:
