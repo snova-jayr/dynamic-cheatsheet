@@ -53,6 +53,7 @@ class LanguageModel:
             "ollama/llama3:70b",
             "sambanova/Meta-Llama-3.3-70B-Instruct",
             "sambanova/DeepSeek-R1",
+            "sambanova/DeepSeek-V3-0324",
             "sambanova/Meta-Llama-3.1-405B-Instruct",
             "sambanova/Llama-4-Maverick-17B-128E-Instruct",
             "sambanova/Qwen3-32B",
