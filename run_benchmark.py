@@ -110,6 +110,16 @@ def main(args):
         dataset = dataset[args.task]
     elif args.task in ["GPQA_Diamond", "AIME_2020_2024", "AIME_2024", "AIME_2025", "MMLU_Pro_Physics", "MMLU_Pro_Engineering", "MathEquationBalancer"]:
         dataset = load_from_disk(f"data/{args.task}")
+    elif args.task in ["CUSTOM_AIME_2024"]:
+        def load_parquet_as_list(file_path):
+            """Load a Parquet file and return a list of dictionaries (examples)."""
+            df = pd.read_parquet(file_path)  # Load Parquet file
+            return df.to_dict(orient="records")  # Convert to list of dictionaries
+
+        dataset = load_parquet_as_list("...")
+
+        dataset = [{"input": example['problem'], "target": example['answer']} for example in dataset]
+
     else:
         raise ValueError(f"Task {args.task} is not recognized. Please make sure the task name is correct.")
     
@@ -180,8 +190,8 @@ def main(args):
     # dataset = dataset.select(range(args.max_n_samples))
 
     # Shuffle the dataset if the no_shuffle flag is not set
-    if not args.no_shuffle:
-        dataset = dataset.shuffle(seed=10)
+    # if not args.no_shuffle:
+    #     dataset = dataset.shuffle(seed=10)
 
     # Initialize the questions and the embeddings
     questions = None
@@ -219,7 +229,7 @@ def main(args):
 
         previous_inputs.append(input)
 
-        if args.task == "AIME_2020_2024" or args.task == "AIME_2024" or args.task == "AIME_2025":
+        if args.task == "AIME_2020_2024" or args.task == "AIME_2024" or args.task == "AIME_2025" or args.task == "CUSTOM_AIME_2024":
             # Add a specific format to the input for the AIME tasks
             input = f"{input} (Please provide your answer in the form of an integer, e.g., 1234, with no Markdown formatting or additional text; make sure to pay attention to the desired format of the final answer though.)"
         elif args.task == "MathEquationBalancer":
@@ -274,7 +284,7 @@ def main(args):
 
         if args.task == "GameOf24":
             result = eval_for_GameOf24(original_input, final_answer)
-        elif args.task in ["AIME_2025", "AIME_2024", "AIME_2020_2024"]:
+        elif args.task in ["AIME_2025", "AIME_2024", "AIME_2020_2024", "CUSTOM_AIME_2024"]:
             result = eval_for_exact_matching_with_no_punctuation(final_answer.lower(), original_target.lower())
         elif args.task in ["GPQA_Diamond", "MMLU_Pro_Engineering", "MMLU_Pro_Physics"]:
             result = result = eval_for_multiple_choice(input, final_answer, original_target)
