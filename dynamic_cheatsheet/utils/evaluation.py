@@ -90,6 +90,18 @@ def remove_punctuation(output: str) -> str:
         output = output.replace(marker, "")
     return output
 
+def safe_int_conversion(s):
+    """
+    Converts a string to an integer, returning None if conversion fails.
+
+    :param s: Input string
+    :return: Integer value if conversion is successful, otherwise None
+    """
+    try:
+        return int(s)
+    except ValueError:
+        return s 
+
 
 def convert_newline_to_space(output: str) -> str:
     """
@@ -107,6 +119,12 @@ def eval_for_exact_matching_with_no_punctuation(
     """
     output = remove_punctuation(output)
     output = convert_newline_to_space(output)
+    import re 
+    output_number = re.findall(r'\d+', output)
+    if len(output_number) > 0: 
+        output = output_number[0]
+    output = safe_int_conversion(output)
+    target = safe_int_conversion(target)
     if target == output:
         return True
     return False

@@ -116,7 +116,7 @@ def main(args):
             df = pd.read_parquet(file_path)  # Load Parquet file
             return df.to_dict(orient="records")  # Convert to list of dictionaries
 
-        dataset = load_parquet_as_list("...")
+        dataset = load_parquet_as_list("/import/snvm-sc-scratch2/jayr/aime_2024_data/aime_2024.parquet")
 
         dataset = [{"input": example['problem'], "target": example['answer']} for example in dataset]
 
@@ -242,7 +242,6 @@ def main(args):
 
         # Print the details
         print(f"### Example {idx+1} ###")
-    
         # Generate the output from the language model using the DynamicCheatsheet approach or other approaches
         output_dict = model.advanced_generate(
             approach_name=args.approach_name,
