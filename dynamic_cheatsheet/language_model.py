@@ -252,7 +252,6 @@ class LanguageModel:
             previous_answers = []
 
             generator_output = ''
-
             for round in range(max(1, max_num_rounds)):
                 ## STEP 1: Run the generator model with the input text and the cheatsheet
                 generator_cheatsheet_content = cheatsheet
@@ -294,7 +293,6 @@ class LanguageModel:
                 cheatsheet = new_cheatsheet
 
                 previous_answers.append(f"Round {round+1}: {generator_answer}")
-            
                 steps.append({
                     "round": round,
                     "generator_prompt": generator_prompt,
@@ -303,7 +301,6 @@ class LanguageModel:
                     "current_cheatsheet": current_cheatsheet,
                     "new_cheatsheet": new_cheatsheet,
                 })
-
             return {
                 "input_txt": input_txt,
                 "steps": steps,
