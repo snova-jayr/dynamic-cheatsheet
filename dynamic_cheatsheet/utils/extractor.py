@@ -75,7 +75,6 @@ def extract_cheatsheet(
     """
     response = response.strip()
     # <cheatsheet> (content) </cheatsheet>
-
     if "<cheatsheet>" in response:
         try:
             txt = response.split("<cheatsheet>")[1].strip()
