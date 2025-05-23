@@ -75,12 +75,10 @@ def extract_cheatsheet(
     """
     response = response.strip()
     # <cheatsheet> (content) </cheatsheet>
-    if not ("<cheatsheet>" in response and "</cheatsheet>" in response and "<memory_item>" in response and "</memory_item>" in response): 
-        return old_cheatsheet 
 
     if "<cheatsheet>" in response:
         try:
-            txt = response.split("<cheatsheet>\n\nVersion: ")[1].strip()
+            txt = response.split("<cheatsheet>")[1].strip()
             txt = txt.split("</cheatsheet>")[0].strip()
             return txt
         except:
