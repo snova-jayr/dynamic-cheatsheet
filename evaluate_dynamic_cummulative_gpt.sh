@@ -1,4 +1,4 @@
-python run_benchmark.py --task "CUSTOM_AIME_2024" --approach "DynamicCheatsheet_Cumulative_alternate" \
+python run_benchmark.py --task "CUSTOM_AIME_2024" --approach "DynamicCheatsheet_Cumulative" \
     --model_name "openai/gpt-4o" \
     --save_directory "gpt_4o_dc" \
     --generator_prompt_path "prompts/generator_prompt.txt" \
