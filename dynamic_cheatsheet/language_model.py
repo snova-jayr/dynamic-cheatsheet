@@ -1,14 +1,16 @@
 import numpy as np
+import time 
 import tiktoken
 from typing import List, Tuple
 from sklearn.metrics.pairwise import cosine_similarity
 from .utils.execute_code import extract_and_run_python_code
 from .utils.extractor import extract_answer, extract_cheatsheet
-import litellm
-from litellm import completion
+import openai
+#import litellm
+#from litellm import completion
 from functools import partial
 from transformers import AutoModelForCausalLM, AutoTokenizer
-litellm.drop_params=True
+#litellm.drop_params=True
 
 class LanguageModel:
     def __init__(self,
@@ -58,13 +60,14 @@ class LanguageModel:
             "sambanova/Llama-4-Maverick-17B-128E-Instruct",
             "sambanova/Qwen3-32B",
         ]:
-            self.client = partial(completion, model=self.model_name)
+            self.client = None 
         else:
             self.client = None
             self.model_hf = AutoModelForCausalLM.from_pretrained(self.model_name, device_map='auto')
             self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
         
         self.gpt4Tokenizer = tiktoken.encoding_for_model('gpt-4o')
+
     def count_tokens(self, text: str) -> int:
         """
         Count the number of tokens in the text.
@@ -103,63 +106,17 @@ class LanguageModel:
         """
         if len(history) == 0:
             raise ValueError("History must contain at least one message.")
-        
-        if self.client is None:
-            chat_input = self.tokenizer.apply_chat_template(history, return_tensors="pt")
-            generate = self.model_hf.generate(chat_input, temperature=temperature, max_new_tokens=max_tokens)
-            output = self.tokenizer.decode(generate[0], skip_special_tokens=True)
-        # Generate the response from the language model
-        else:
-            output = self.client(
-                messages=history,
-                model=self.model_name,
-                temperature=temperature,
-                max_completion_tokens=max_tokens,
-            ).choices[0].message["content"]
 
-        # If Python code execution is allowed, execute the code
-        pre_code_execution_flag = output.split(code_execution_flag)[0].strip()
-        if allow_code_execution and code_execution_flag in output and '```' == pre_code_execution_flag[-3:]:
-            if code_execution_flag in output:
-                output_prefix = output.split(code_execution_flag)[0].strip()
-            else:
-                # TODO (msuzgun): This is a temporary solution. We may want to find a better way to handle this.
-                output_prefix = output
-            executed_code = extract_and_run_python_code(output_prefix)
-            executed_code = executed_code.strip()
-            current_output = f"{output_prefix}\n{code_execution_flag}\n\n{executed_code}"
-            final_output = f"{final_output}\n\n{current_output}".strip()
-            # import pdb; pdb.set_trace()
-            # print(f"*** This code has been executed:\n{executed_code}\n\n")
-            # print(f"***And the output is:\n{current_output}")
-            # If the current depth is less than or equal to the maximum depth, add a new message to the history
-            if current_depth <= max_depth_num_rounds:
-                warning_txt = ""
-                if current_depth == max_depth_num_rounds:
-                    warning_txt = f" (This is the last round. No more code execution will be allowed. Please present your final solution now.)"
-                new_messages = [
-                    {"role": "assistant", "content": current_output},
-                    {"role": "user", "content": f"Proceed with any additional steps required and provide the completed solution. If everything is already complete, type FINAL ANSWER and submit it in the expected format. If you are stucked, please try alternative methods to solve the problem and provide the final solution.{warning_txt}"}
-                ]
-                history += new_messages
-                return self.generate(
-                    history=history,
-                    temperature=temperature,
-                    max_tokens=max_tokens,
-                    current_depth=current_depth+1,
-                    max_depth_num_rounds=max_depth_num_rounds,
-                    allow_code_execution=allow_code_execution,
-                    code_execution_flag=code_execution_flag,
-                    final_output=final_output,
-                )
-            else:
-                final_output = f"{final_output}\n\n{current_output}".strip()
-                return final_output
-        else:
-            # If code execution is not allowed or no code block is found, return the final output
-            # Add the output to the final output
-            final_output = f"{final_output}\n\n{output}".strip()
-            return final_output
+
+        response = openai.ChatCompletion.create(
+                    engine="Internal_Copilot",
+                    messages=history,
+                    max_tokens=max_tokens
+        )
+
+        final_output = response['choices'][0]["message"]["content"]
+
+        return final_output
 
     def advanced_generate(self,
         approach_name: str,
@@ -266,6 +223,9 @@ class LanguageModel:
 
                 # Prepare the message history for the generator model
                 generator_history = [{"role": "user", "content": generator_prompt}]
+
+                time.sleep(60)
+
                 # Run the generator model
                 generator_output = self.generate(
                     history=generator_history,
@@ -281,6 +241,8 @@ class LanguageModel:
                 cheatsheet_prompt = cheatsheet_template.replace("[[QUESTION]]", input_txt).replace("[[MODEL_ANSWER]]", generator_output).replace("[[PREVIOUS_CHEATSHEET]]", current_cheatsheet)
 
                 cheatsheet_history = [{"role": "user", "content": cheatsheet_prompt}]
+
+                time.sleep(60)
                 cheatsheet_output = self.generate(
                     history=cheatsheet_history,
                     temperature=temperature,
@@ -293,6 +255,79 @@ class LanguageModel:
                 cheatsheet = new_cheatsheet
 
                 previous_answers.append(f"Round {round+1}: {generator_answer}")
+                steps.append({
+                    "round": round,
+                    "generator_prompt": generator_prompt,
+                    "generator_output": generator_output,
+                    "generator_answer": generator_answer,
+                    "current_cheatsheet": current_cheatsheet,
+                    "new_cheatsheet": new_cheatsheet,
+                })
+            return {
+                "input_txt": input_txt,
+                "steps": steps,
+                "previous_answers": previous_answers,
+                "final_answer": generator_answer,
+                "final_cheatsheet": new_cheatsheet,
+                "final_output": generator_output,
+            }
+        elif approach_name == "DynamicCheatsheet_Cumulative_alternate":
+            if cheatsheet is None:
+                raise ValueError("Cheatsheet must be provided for dynamic_cheatsheet approach.")
+            if cheatsheet_template is None:
+                raise ValueError("Cheatsheet template must be provided for dynamic_cheatsheet approach.")
+            
+            steps = []
+            previous_answers = []
+            current_cheatsheet = cheatsheet 
+            generator_output = ''
+            for round in range(max(1, max_num_rounds)):
+
+                ## STEP 2: Run the cheatsheet extraction model with the question and the current cheatsheet
+
+                cheatsheet_prompt = cheatsheet_template.replace("[[QUESTION]]", input_txt).replace("[[MODEL_ANSWER]]", generator_output).replace("[[PREVIOUS_CHEATSHEET]]", current_cheatsheet)
+
+                cheatsheet_history = [{"role": "user", "content": cheatsheet_prompt}]
+            
+                cheatsheet_output = self.generate(
+                    history=cheatsheet_history,
+                    temperature=temperature,
+                    max_tokens=2*max_tokens,
+                    allow_code_execution=False,
+                )
+
+                # Extract the new cheatsheet from the output (if present); otherwise, return the old cheatsheet
+                new_cheatsheet = extract_cheatsheet(response=cheatsheet_output, old_cheatsheet=current_cheatsheet)
+                cheatsheet = new_cheatsheet
+
+                ## STEP 3: Run the generator model with the input text and the cheatsheet
+
+                generator_cheatsheet_content = cheatsheet
+                current_cheatsheet = cheatsheet 
+
+                # If there are previous answers, add them to the cheatsheet content for the generator
+                if round > 0 and add_previous_answers_to_cheatsheet:
+                    previous_answers_txt = f"PREVIOUS ANSWERS:\n{'; '.join(previous_answers)}"
+                    generator_cheatsheet_content = f"{generator_cheatsheet_content}\n\n{previous_answers_txt}"
+
+                generator_prompt = generator_template.replace("[[QUESTION]]", input_txt).replace("[[CHEATSHEET]]", generator_cheatsheet_content)
+
+                # Prepare the message history for the generator model
+                generator_history = [{"role": "user", "content": generator_prompt}]
+            
+                # Run the generator model
+                generator_output = self.generate(
+                    history=generator_history,
+                    temperature=temperature,
+                    max_tokens=max_tokens,
+                    allow_code_execution=allow_code_execution,
+                    code_execution_flag=code_execution_flag,
+                )
+                # Extract the output from the generator model
+                generator_answer = extract_answer(generator_output)
+                
+                previous_answers.append(f"Round {round+1}: {generator_answer}")
+
                 steps.append({
                     "round": round,
                     "generator_prompt": generator_prompt,
@@ -359,7 +394,6 @@ class LanguageModel:
             # Get the current original input embedding
             current_original_input_embedding = original_input_embeddings[-1] # Current original input embedding
             prev_original_input_embeddings = original_input_embeddings[:-1] # Note that this can be empty
-            
             # Retrieve the most similar k input-output pairs from the previous inputs and outputs
             if len(prev_original_input_embeddings) > 0:
                 similarities = cosine_similarity([current_original_input_embedding], prev_original_input_embeddings)
@@ -402,7 +436,7 @@ class LanguageModel:
                 # Finally, extract the new cheatsheet from the output (if present); otherwise, return the old cheatsheet
                 new_cheatsheet = extract_cheatsheet(response=cheatsheet_output, old_cheatsheet=curated_cheatsheet)
                 curated_cheatsheet = new_cheatsheet
-
+                
             # Replace the relevant placeholders in the generator template with the input text and the curated cheatsheet and then run the generator model
             generator_prompt = generator_template.replace("[[QUESTION]]", input_txt).replace("[[CHEATSHEET]]", curated_cheatsheet)
             generator_history = [{"role": "user", "content": generator_prompt}]
@@ -415,7 +449,6 @@ class LanguageModel:
                 )
             # Extract the answer from the generator model
             generator_answer = extract_answer(generator_output)
-
             return {
                 "input_txt": input_txt,
                 "steps": [

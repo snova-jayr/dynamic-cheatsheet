@@ -11,6 +11,15 @@ from dynamic_cheatsheet.utils.evaluation import eval_for_GameOf24, eval_for_mult
 
 from dotenv import load_dotenv
 
+
+import openai
+
+openai.api_type = "azure"
+openai.api_key = "983d9e08a78c4c2d8e89dcfac2de5605"
+openai.api_base = "https://snova.openai.azure.com"
+openai.api_version = "2024-12-01-preview"
+
+
 PREDEFINED_PROMPTS = {
     "GameOf24": f"Let's play a game called 24. You'll be given four integers, and your objective is to use each number only once, combined with any of the four arithmetic operations (addition, subtraction, multiplication, and division) and parentheses, to achieve a total of 24. For example, if the input is 4, 7, 8, and 8, the output could be (7 - (8 / 8)) * 4 = 24. Please present a single expression that evaluates to 24.",
 }
@@ -52,7 +61,9 @@ def parse_arguments():
     parser.add_argument("--additional_flag_for_save_path", type=str, default="", help="Additional flag for the save path")
     parser.add_argument("--max_n_samples", type=int, default=-1, help="Maximum number of samples to process")
     parser.add_argument("--no_shuffle", action="store_true", help="Disable shuffling of the dataset")
-
+    parser.add_argument("--shuffle_seed", type=int, default=10, help="Random seed for shuffling dataset order")
+    parser.add_argument("--k_means", action="store_true", help="Apply K means clustering to dataset")
+    parser.add_argument("--num_clusters", type=int, default=5)
     args = parser.parse_args()
 
     # Convert to a dictionary for compatibility with the rest of the code
@@ -190,19 +201,44 @@ def main(args):
     # dataset = dataset.select(range(args.max_n_samples))
 
     # Shuffle the dataset if the no_shuffle flag is not set
-    # if not args.no_shuffle:
-    #     dataset = dataset.shuffle(seed=10)
+    if not args.no_shuffle:
+        print("shuffled")
+        import random 
+        random.seed(args.shuffle_seed)
+        random.shuffle(dataset)
+
+    if args.k_means: 
+        from sklearn.cluster import KMeans
+        from sentence_transformers import SentenceTransformer
+        embedder = SentenceTransformer("all-MiniLM-L6-v2")
+        all_input_dataset = [data['input'] for data in dataset]
+        dataset_embeddings = embedder.encode(all_input_dataset)
+        
+        # Perform kmeans clustering
+        num_clusters = args.num_clusters
+        clustering_model = KMeans(n_clusters=num_clusters)
+        clustering_model.fit(dataset_embeddings)
+        cluster_assignment = clustering_model.labels_
+
+        # cluster dataset 
+        clustered_dataset = [[] for i in range(num_clusters)]
+        for sentence_id, cluster_id in enumerate(cluster_assignment):
+            clustered_dataset[cluster_id].append(dataset[sentence_id])
+        clustered_dataset.sort(key=lambda x: len(x), reverse=True)
+        
+        # flatten clusters 
+        dataset = [data for cluster in clustered_dataset for data in cluster]
+
 
     # Initialize the questions and the embeddings
     questions = None
     embeddings = None
     if args.approach_name in ["Dynamic_Retrieval", "DynamicCheatsheet_RetrievalSynthesis", "FullHistoryAppending"]:
-        df = pd.read_csv(f"embeddings/{args.task}.csv")
+        df = pd.read_csv(f"embeddings/AIME_2024_refactored.csv")
         questions = df["input"].tolist()
         embeddings = df["embedding"]
         embeddings = embeddings.apply(eval)
         embeddings = np.array(embeddings.tolist()) # (N, 1536)
-
         # Re-order the embeddings based on the order of the dataset inputs
         dataset_inputs = [example["input"] for example in dataset]
         indices = [questions.index(input) for input in dataset_inputs]
@@ -242,6 +278,8 @@ def main(args):
 
         # Print the details
         print(f"### Example {idx+1} ###")
+        import time 
+        time.sleep(60)
         # Generate the output from the language model using the DynamicCheatsheet approach or other approaches
         output_dict = model.advanced_generate(
             approach_name=args.approach_name,
