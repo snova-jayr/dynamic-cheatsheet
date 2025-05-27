@@ -4,6 +4,7 @@ import os
 import pandas as pd
 import numpy as np
 import argparse
+import time 
 
 from datasets import load_dataset, load_from_disk
 from dynamic_cheatsheet.language_model import LanguageModel
@@ -276,10 +277,9 @@ def main(args):
         if idx < start_idx:
             continue
 
+        time.sleep(60)
         # Print the details
         print(f"### Example {idx+1} ###")
-        import time 
-        time.sleep(60)
         # Generate the output from the language model using the DynamicCheatsheet approach or other approaches
         output_dict = model.advanced_generate(
             approach_name=args.approach_name,
