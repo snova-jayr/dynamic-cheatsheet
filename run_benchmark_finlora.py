@@ -256,7 +256,7 @@ def test_fin_tasks(args, data_name="xbrl_finer", prompt_fun=None):
         print(f"FINAL ANSWER: {final_answer}")
         print("**" * 50)
 
-        out_text_list += final_answer
+        out_text_list.append(final_answer)
 
     if "finer" in data_name or "fnxl" in data_name:
         out_text_list, target_list = process_batched(out_text_list, target_list)
@@ -265,7 +265,6 @@ def test_fin_tasks(args, data_name="xbrl_finer", prompt_fun=None):
 
     if data_name == "financebench" or data_name == "xbrl_term":
         metric = evaluate.load("bertscore")
-        # print(out_text_list, target_list)
         results = metric.compute(predictions=out_text_list, references=target_list, model_type="ProsusAI/finbert")
         precision = sum(results["precision"]) / len(results["precision"])
         recall = sum(results["recall"]) / len(results["recall"])
