@@ -263,15 +263,19 @@ def test_fin_tasks(args, data_name="xbrl_finer", prompt_fun=None):
 
     per_question_time = (time.time() - task_start_time) / sample_size
 
+    final_results = {}
+
     if data_name == "financebench" or data_name == "xbrl_term":
         metric = evaluate.load("bertscore")
         results = metric.compute(predictions=out_text_list, references=target_list, model_type="ProsusAI/finbert")
         precision = sum(results["precision"]) / len(results["precision"])
         recall = sum(results["recall"]) / len(results["recall"])
         f1 = sum(results["f1"]) / len(results["f1"])
+        final_results['precision'] = precision 
+        final_results['recall'] = recall 
+        final_results['f1'] = f1
         print(
             f"\n✓ {data_name}: precision: {precision:.3f}, recall: {recall:.3f}, f1: {f1:.3f}, Time per question: {per_question_time:.2f}")
-        return None
 
     else:
         all_target_type_for_classification = list(set(target_list))
@@ -284,19 +288,21 @@ def test_fin_tasks(args, data_name="xbrl_finer", prompt_fun=None):
             print(f"Error calculating F1 score for {data_name}")
         print(
             f"\n✓ {data_name}: Accuracy: {acc * 100:.3f}%, F1: {f1:.3f}, Time per question: {per_question_time:.2f} s")
-
+        
+        final_results['acc'] = acc
+        final_results['f1'] = f1
         results = {"task": data_name, "acc": acc, "f1": f1, "time": per_question_time}
 
-        with open(args.save_path_name, "w+") as f:
-            f.write(f"Task: {data_name}\n")
-            f.write(f"Accuracy: {acc * 100:.2f}%\n")
-            f.write(f"F1 Score: {f1:.3f}\n")
-            f.write(f"Per question time: {per_question_time:.2f} minutes\n")
-            f.write(f"Model: {args.base_model}\n")
-            f.write(f"Sample Ratio: {args.sample_ratio}\n")
-            f.write(f"Temperature: {args.temperature}\n")
+    with open(args.save_path_name, "w+") as f:
+        f.write(f"Task: {data_name}\n")
+        for key in final_results:
+            f.write(f"{key}: {final_results[key]}\n")
+        f.write(f"Per question time: {per_question_time:.2f} minutes\n")
+        f.write(f"Model: {args.model_name}\n")
+        f.write(f"Sample Ratio: {args.sample_ratio}\n")
+        f.write(f"Temperature: {args.temperature}\n")
 
-        return results
+    return results
 
 
 def main(args):
