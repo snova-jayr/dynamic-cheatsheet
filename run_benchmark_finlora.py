@@ -163,7 +163,7 @@ def test_fin_tasks(args, data_name="xbrl_finer", prompt_fun=None):
             cheatsheet = file.read()
 
     time_stamp = datetime.today().strftime('%Y-%m-%d-%H-%M')
-    args.save_path_name = f"{args.save_directory}/{data_name}/{args.model_name}_{args.approach_name}_{time_stamp}_{args.additional_flag_for_save_path}.jsonl"
+    args.save_path_name = f"{args.save_directory}/{data_name}/{args.model_name}_{args.approach_name}_{time_stamp}.jsonl"
 
     # Create the directory if it does not exist
     dir_path = os.path.dirname(args.save_path_name)
@@ -247,14 +247,21 @@ def test_fin_tasks(args, data_name="xbrl_finer", prompt_fun=None):
         cheatsheet = output_dict["final_cheatsheet"]
         final_answer = output_dict["final_output"]
 
-        ## FOR DEBUGGING PURPOSES
-        # import pdb; pdb.set_trace()
         print(f"@ CHEATSHEET:\n{cheatsheet}")
         print('- ' * 50)
         print(f"INPUT: {tmp_context}")
         print(f"TARGET: {tmp_target}")
         print(f"FINAL ANSWER: {final_answer}")
         print("**" * 50)
+        
+        with open(args.save_path_name, "a") as f:
+            f.write(f"INDEX: {i}")
+            f.write(f"@ CHEATSHEET:\n{cheatsheet}")
+            f.write('- ' * 50)
+            f.write(f"INPUT: {tmp_context}")
+            f.write(f"TARGET: {tmp_target}")
+            f.write(f"FINAL ANSWER: {final_answer}")
+            f.write("**" * 50)
 
         out_text_list.append(final_answer)
 
@@ -293,7 +300,7 @@ def test_fin_tasks(args, data_name="xbrl_finer", prompt_fun=None):
         final_results['f1'] = f1
         results = {"task": data_name, "acc": acc, "f1": f1, "time": per_question_time}
 
-    with open(args.save_path_name, "w+") as f:
+    with open(args.save_path_name, "a") as f:
         f.write(f"Task: {data_name}\n")
         for key in final_results:
             f.write(f"{key}: {final_results[key]}\n")
