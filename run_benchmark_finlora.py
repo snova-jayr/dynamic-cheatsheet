@@ -255,13 +255,15 @@ def test_fin_tasks(args, data_name="xbrl_finer", prompt_fun=None):
         print("**" * 50)
         
         with open(args.save_path_name, "a") as f:
-            f.write(f"INDEX: {i}")
-            f.write(f"@ CHEATSHEET:\n{cheatsheet}")
+            f.write(f"INDEX: {i}\n")
+            f.write(f"@ CHEATSHEET:\n{cheatsheet}\n")
             f.write('- ' * 50)
-            f.write(f"INPUT: {tmp_context}")
-            f.write(f"TARGET: {tmp_target}")
-            f.write(f"FINAL ANSWER: {final_answer}")
+            f.write("\n")
+            f.write(f"INPUT: {tmp_context}\n")
+            f.write(f"TARGET: {tmp_target}\n")
+            f.write(f"FINAL ANSWER: {final_answer}\n")
             f.write("**" * 50)
+            f.write("\n")
 
         out_text_list.append(final_answer)
 
