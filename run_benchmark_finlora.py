@@ -127,6 +127,65 @@ def write_jsonl(file_path, data):
             file.write(json.dumps(line) + "\n")
 
 
+def evaluate_accuracy(out, target, target_type_list):
+    correct_count = 0
+    response = []
+
+    target_type_list_lower = [str(t).lower() for t in target_type_list]
+
+    if len(out) != len(target):
+        raise ValueError("Input lists 'out' and 'target' must have the same length.")
+
+    for x, y in zip(out, target):
+        # Ensure inputs are strings and convert to lowercase
+        x_str = str(x)
+        y_str = str(y)
+        x_lower = x_str.lower()
+        y_lower = y_str.lower()
+
+        found_labels_info = []
+
+        # Find the first occurrence of each valid label in the output x
+        for valid_label in target_type_list_lower:
+            try:
+                # string.find() returns -1 if not found, or the starting index
+                index = x_lower.find(valid_label)
+                if index != -1:
+                    found_labels_info.append({'label': valid_label, 'index': index})
+            except AttributeError:
+                print(f"Warning: Attribute error during find for x='{x_str}', label='{valid_label}'")
+                continue
+
+        is_current_prediction_correct = False
+
+        if not found_labels_info:
+            is_current_prediction_correct = False
+        else:
+            found_labels_info.sort(key=lambda item: item['index'])
+
+            # The first label in the sorted list is the one that appeared earliest.
+            first_occurred_label = found_labels_info[0]['label']
+
+            # Check if this first occurred label matches the target label y_lower.
+            if first_occurred_label == y_lower:
+                is_current_prediction_correct = True
+            else:
+                is_current_prediction_correct = False
+
+        # Update correct count and the response list
+        if is_current_prediction_correct:
+            correct_count += 1
+            response.append(y)  # Append the original target label (y)
+        else:
+            response.append(x)  # Append the original LLM output (x)
+
+    accuracy = 0.0
+    if len(out) > 0:
+        accuracy = correct_count / len(out)
+
+    return accuracy, response
+
+
 def test_fin_tasks(args, data_name="xbrl_finer", prompt_fun=None):
     start_time = time.time()
     results = {}
@@ -220,6 +279,8 @@ def test_fin_tasks(args, data_name="xbrl_finer", prompt_fun=None):
         
         tmp_target = instructions['target'].tolist()[i]
         
+        time.sleep(10)
+
         output_dict = model.advanced_generate(
             approach_name=args.approach_name,
             input_txt=tmp_context,
