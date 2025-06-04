@@ -270,6 +270,7 @@ class LanguageModel:
 
                 # Prepare the message history for the generator model
                 generator_history = [{"role": "user", "content": generator_prompt}]
+
                 # Run the generator model
                 generator_output = self.generate(
                     history=generator_history,
@@ -285,6 +286,7 @@ class LanguageModel:
                 cheatsheet_prompt = cheatsheet_template.replace("[[QUESTION]]", input_txt).replace("[[MODEL_ANSWER]]", generator_output).replace("[[PREVIOUS_CHEATSHEET]]", current_cheatsheet)
 
                 cheatsheet_history = [{"role": "user", "content": cheatsheet_prompt}]
+
                 cheatsheet_output = self.generate(
                     history=cheatsheet_history,
                     temperature=temperature,
@@ -295,7 +297,7 @@ class LanguageModel:
                 # Extract the new cheatsheet from the output (if present); otherwise, return the old cheatsheet
                 new_cheatsheet = extract_cheatsheet(response=cheatsheet_output, old_cheatsheet=current_cheatsheet)
                 cheatsheet = new_cheatsheet
-
+                #breakpoint()
                 previous_answers.append(f"Round {round+1}: {generator_answer}")
                 steps.append({
                     "round": round,

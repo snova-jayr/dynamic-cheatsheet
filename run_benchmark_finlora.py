@@ -305,10 +305,11 @@ def test_fin_tasks(args, data_name="xbrl_finer", prompt_fun=None):
                 "target": tmp_target,
                 **output_dict,
             })
+
         cheatsheet = output_dict["final_cheatsheet"]
         final_answer = output_dict["final_output"]
 
-        print(f"@ CHEATSHEET:\n{cheatsheet}")
+        print(f"@ CHEATSHEET:\n{cheatsheet}\n")
         print('- ' * 50)
         print(f"INPUT: {tmp_context}")
         print(f"TARGET: {tmp_target}")
