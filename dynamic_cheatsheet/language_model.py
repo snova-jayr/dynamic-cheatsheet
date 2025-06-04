@@ -10,6 +10,13 @@ from functools import partial
 from transformers import AutoModelForCausalLM, AutoTokenizer
 litellm.drop_params=True
 
+import openai 
+openai.api_type = "azure"
+openai.api_key = "983d9e08a78c4c2d8e89dcfac2de5605"
+openai.api_base = "https://snova.openai.azure.com"
+openai.api_version = "2024-12-01-preview"
+openai.azure_endpoint="https://snova.openai.azure.com/"
+
 class LanguageModel:
     def __init__(self,
         model_name: str,
@@ -287,12 +294,22 @@ class LanguageModel:
 
                 cheatsheet_history = [{"role": "user", "content": cheatsheet_prompt}]
 
+                response = openai.chat.completions.create(
+                    model="gpt-4o",
+                    messages=cheatsheet_history,
+                    max_tokens=2*max_tokens
+                )
+
+                cheatsheet_output = response['choices'][0]["message"]["content"]
+
+                '''
                 cheatsheet_output = self.generate(
                     history=cheatsheet_history,
                     temperature=temperature,
                     max_tokens=2*max_tokens,
                     allow_code_execution=False,
                 )
+                '''
 
                 # Extract the new cheatsheet from the output (if present); otherwise, return the old cheatsheet
                 new_cheatsheet = extract_cheatsheet(response=cheatsheet_output, old_cheatsheet=current_cheatsheet)
