@@ -51,6 +51,7 @@ class LanguageModel:
             "together_ai/Qwen/Qwen2.5-72B-Instruct-Turbo",
             "gemini/gemini-2.0-flash",
             "ollama/llama3:70b",
+            "sambanova/Meta-Llama-3.1-8B-Instruct",
             "sambanova/Meta-Llama-3.3-70B-Instruct",
             "sambanova/DeepSeek-R1",
             "sambanova/DeepSeek-V3-0324",
@@ -65,6 +66,7 @@ class LanguageModel:
             self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
         
         self.gpt4Tokenizer = tiktoken.encoding_for_model('gpt-4o')
+
     def count_tokens(self, text: str) -> int:
         """
         Count the number of tokens in the text.
@@ -207,10 +209,12 @@ class LanguageModel:
 
         # If the approach name is "default", run the generator model with the input text and the current cheatsheet
         if approach_name == "default":
-            generator_prompt = generator_template.replace("[[QUESTION]]", input_txt).replace("[[CHEATSHEET]]", "(empty)")
+            #generator_prompt = generator_template.replace("[[QUESTION]]", input_txt).replace("[[CHEATSHEET]]", "(empty)")
+            generator_prompt = input_txt
             generator_history = [
                 {"role": "user", "content": generator_prompt},
             ]
+            
             generator_output = self.generate(
                 history=generator_history,
                 temperature=temperature,
@@ -218,10 +222,10 @@ class LanguageModel:
                 allow_code_execution=allow_code_execution,
                 code_execution_flag=code_execution_flag,
             )
-
-            generator_answer = extract_answer(
-                generator_output,
-            )
+        
+            #generator_answer = extract_answer(
+            #    generator_output,
+            #)
 
             return {
                 "input_txt": input_txt,
@@ -230,13 +234,13 @@ class LanguageModel:
                         "round": 0,
                         "generator_prompt": generator_prompt,
                         "generator_output": generator_output,
-                        "generator_answer": generator_answer,
-                        "current_cheatsheet": None,
-                        "new_cheatsheet": None,
+                        #"generator_answer": generator_answer,
+                        #"current_cheatsheet": None,
+                        #"new_cheatsheet": None,
                     }
                 ],
                 "previous_answers": None,
-                "final_answer": generator_answer,
+                #"final_answer": generator_answer,
                 "final_output": generator_output,
                 "final_cheatsheet": None,
                 "generator_output": generator_output,
