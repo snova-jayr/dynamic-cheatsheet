@@ -10,13 +10,6 @@ from functools import partial
 from transformers import AutoModelForCausalLM, AutoTokenizer
 litellm.drop_params=True
 
-import openai 
-openai.api_type = "azure"
-openai.api_key = "983d9e08a78c4c2d8e89dcfac2de5605"
-openai.api_base = "https://snova.openai.azure.com"
-openai.api_version = "2024-12-01-preview"
-openai.azure_endpoint="https://snova.openai.azure.com/"
-
 class LanguageModel:
     def __init__(self,
         model_name: str,
@@ -216,7 +209,6 @@ class LanguageModel:
 
         # If the approach name is "default", run the generator model with the input text and the current cheatsheet
         if approach_name == "default":
-            #generator_prompt = generator_template.replace("[[QUESTION]]", input_txt).replace("[[CHEATSHEET]]", "(empty)")
             generator_prompt = input_txt
             generator_history = [
                 {"role": "user", "content": generator_prompt},
@@ -230,10 +222,6 @@ class LanguageModel:
                 code_execution_flag=code_execution_flag,
             )
         
-            #generator_answer = extract_answer(
-            #    generator_output,
-            #)
-
             return {
                 "input_txt": input_txt,
                 "steps": [
@@ -241,13 +229,9 @@ class LanguageModel:
                         "round": 0,
                         "generator_prompt": generator_prompt,
                         "generator_output": generator_output,
-                        #"generator_answer": generator_answer,
-                        #"current_cheatsheet": None,
-                        #"new_cheatsheet": None,
                     }
                 ],
                 "previous_answers": None,
-                #"final_answer": generator_answer,
                 "final_output": generator_output,
                 "final_cheatsheet": None,
                 "generator_output": generator_output,
@@ -263,6 +247,7 @@ class LanguageModel:
             previous_answers = []
 
             generator_output = ''
+
             for round in range(max(1, max_num_rounds)):
                 ## STEP 1: Run the generator model with the input text and the cheatsheet
                 generator_cheatsheet_content = cheatsheet
@@ -286,6 +271,7 @@ class LanguageModel:
                     allow_code_execution=allow_code_execution,
                     code_execution_flag=code_execution_flag,
                 )
+
                 # Extract the output from the generator model
                 generator_answer = extract_answer(generator_output)
 
@@ -293,29 +279,20 @@ class LanguageModel:
                 cheatsheet_prompt = cheatsheet_template.replace("[[QUESTION]]", input_txt).replace("[[MODEL_ANSWER]]", generator_output).replace("[[PREVIOUS_CHEATSHEET]]", current_cheatsheet)
 
                 cheatsheet_history = [{"role": "user", "content": cheatsheet_prompt}]
-
-                response = openai.chat.completions.create(
-                    model="gpt-4o",
-                    messages=cheatsheet_history,
-                    max_tokens=2*max_tokens
-                )
-
-                cheatsheet_output = response['choices'][0]["message"]["content"]
-
-                '''
+                
                 cheatsheet_output = self.generate(
                     history=cheatsheet_history,
                     temperature=temperature,
-                    max_tokens=2*max_tokens,
+                    max_tokens=max_tokens,
                     allow_code_execution=False,
                 )
-                '''
-
+            
                 # Extract the new cheatsheet from the output (if present); otherwise, return the old cheatsheet
                 new_cheatsheet = extract_cheatsheet(response=cheatsheet_output, old_cheatsheet=current_cheatsheet)
                 cheatsheet = new_cheatsheet
-                #breakpoint()
+                
                 previous_answers.append(f"Round {round+1}: {generator_answer}")
+
                 steps.append({
                     "round": round,
                     "generator_prompt": generator_prompt,
@@ -324,6 +301,7 @@ class LanguageModel:
                     "current_cheatsheet": current_cheatsheet,
                     "new_cheatsheet": new_cheatsheet,
                 })
+
             return {
                 "input_txt": input_txt,
                 "steps": steps,
