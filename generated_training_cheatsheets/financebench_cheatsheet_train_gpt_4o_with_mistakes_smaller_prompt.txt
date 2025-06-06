@@ -1,0 +1,35 @@
+Version: 41.0
+
+SOLUTIONS, IMPLEMENTATION PATTERNS, AND CODE SNIPPETS
+<memory_item>
+<description>
+[To extract restructuring costs from financial statements:
+1. Locate the "Restructuring and Impairment Charges" section in the notes to the financial statements.
+2. Identify the total restructuring costs for the specified fiscal year.
+3. Ensure the value is correctly labeled and matches the fiscal year in question.] (Reference: Q43)
+</description>
+<example>
+# Example Extraction:
+# FY2022 Restructuring Costs = $411 million (as outlined in the "Restructuring and Impairment Charges" section).
+</example>
+** Count:  [1]
+
+</memory_item>
+
+GENERAL META-REASONING STRATEGIES
+<memory_item>
+<description>
+[When extracting specific financial figures:
+1. Focus on the relevant section of the financial document (e.g., "Restructuring and Impairment Charges").
+2. Cross-check the fiscal year to ensure accuracy.
+3. Verify that the figure is explicitly stated and not derived or estimated unless required.] (Reference: Q43)
+</description>
+<example>
+# Meta-Reasoning Strategy:
+# 1. Relevant Section: Use "Restructuring and Impairment Charges" for restructuring costs.
+# 2. Fiscal Year Check: Confirm the year matches the question (e.g., FY2022).
+# 3. Explicit Value: Use directly stated values, such as "$411 million."
+</example>
+** Count:  [1]
+
+</memory_item>

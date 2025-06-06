@@ -1,0 +1,38 @@
+Version: 41.0
+
+SOLUTIONS, IMPLEMENTATION PATTERNS, AND CODE SNIPPETS
+<memory_item>
+<description>
+Identifying CEO Experience in Similar Companies: When assessing whether a CEO has prior experience in a similar company, compare the industries, business models (e.g., retail, online, brick-and-mortar), and operational scale of the companies. Look for explicit mentions of previous CEO roles and responsibilities. (Reference: Q191)
+</description>
+<example>
+# Strategy:
+1. Extract the CEO's professional history from the provided document.
+2. Identify previous CEO roles and the nature of the companies managed.
+3. Compare the business models and industries of the previous companies with the current one.
+# Example:
+- Current Company: Foot Locker (retail, brick-and-mortar + online).
+- New CEO: Mary N. Dillon.
+- Previous CEO Role: Ulta Beauty (retail, brick-and-mortar + online).
+- Conclusion: Yes, the new CEO has experience in a similar company.
+</example>
+** Count: 1
+
+</memory_item>
+
+GENERAL META-REASONING STRATEGIES
+<memory_item>
+<description>
+When evaluating executive experience, focus on the alignment between the industries and operational models of the companies involved. Consider factors such as scale, customer base, and business channels (e.g., online vs. physical stores). (Reference: Q191)
+</description>
+<example>
+# Strategy:
+1. Review the executive's professional history for relevant roles.
+2. Compare the industries and operational models of the companies.
+3. Assess the relevance of the executive's experience to the current company's needs.
+# Example:
+- Mary N. Dillon's experience as CEO of Ulta Beauty aligns with Foot Locker's retail and omnichannel business model.
+</example>
+** Count: 1
+
+</memory_item>
