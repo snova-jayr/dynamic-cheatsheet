@@ -311,6 +311,49 @@ class LanguageModel:
                 "final_cheatsheet": new_cheatsheet,
                 "final_output": generator_output,
             }
+        elif approach_name == "Dynamic_with_global_cheatsheet":
+            if cheatsheet is None:
+                raise ValueError("Cheatsheet must be provided for dynamic_cheatsheet approach.")
+            if cheatsheet_template is None:
+                raise ValueError("Cheatsheet template must be provided for dynamic_cheatsheet approach.")
+
+            steps = []
+            previous_answers = []
+            generator_output = ''
+             
+            for round in range(max(1, max_num_rounds)):
+                ## STEP 1: Run the generator model with the input text and the cheatsheet
+                generator_cheatsheet_content = cheatsheet
+
+                # If there are previous answers, add them to the cheatsheet content for the generator
+                if round > 0 and add_previous_answers_to_cheatsheet:
+                    previous_answers_txt = f"PREVIOUS ANSWERS:\n{'; '.join(previous_answers)}"
+                    generator_cheatsheet_content = f"{generator_cheatsheet_content}\n\n{previous_answers_txt}"
+
+                generator_prompt = generator_template.replace("[[QUESTION]]", input_txt).replace("[[CHEATSHEET]]", generator_cheatsheet_content)
+
+                # Prepare the message history for the generator model
+                generator_history = [{"role": "user", "content": generator_prompt}]
+            
+                # Run the generator model
+                generator_output = self.generate(
+                    history=generator_history,
+                    temperature=temperature,
+                    max_tokens=max_tokens,
+                    allow_code_execution=allow_code_execution,
+                    code_execution_flag=code_execution_flag,
+                )
+                # Extract the output from the generator model
+                generator_answer = extract_answer(generator_output)
+
+            return {
+                "input_txt": input_txt,
+                "steps": steps,
+                "previous_answers": previous_answers,
+                "final_answer": generator_answer,
+                "final_cheatsheet": cheatsheet,
+                "final_output": generator_output,
+            }
         elif approach_name == "FullHistoryAppending":
             length_of_history = len(generator_outputs_so_far)
             if length_of_history > 0:

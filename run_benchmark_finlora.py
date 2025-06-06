@@ -209,7 +209,6 @@ def test_fin_tasks(args, data_name="xbrl_finer", prompt_fun=None):
     else:
         args.cheatsheet_prompt = "(empty)"
 
-
     # Initialize the language model
     model = LanguageModel(
         model_name=args.model_name,
@@ -217,8 +216,8 @@ def test_fin_tasks(args, data_name="xbrl_finer", prompt_fun=None):
 
     # Initialize the cheatsheet
     cheatsheet = "(empty)"
-    if args.initialize_cheatsheet_path is not None:
-        with open(args.initialize_cheatsheet_path, "r") as file:
+    if args.cheatsheet_prompt_path is not None:
+        with open(args.cheatsheet_prompt_path, "r") as file:
             cheatsheet = file.read()
 
     time_stamp = datetime.today().strftime('%Y-%m-%d-%H-%M')
