@@ -233,6 +233,7 @@ class LanguageModel:
                 ],
                 "previous_answers": None,
                 "final_output": generator_output,
+                "final_answer": generator_output, 
                 "final_cheatsheet": None,
                 "generator_output": generator_output,
             }
@@ -292,7 +293,7 @@ class LanguageModel:
                 cheatsheet = new_cheatsheet
                 
                 previous_answers.append(f"Round {round+1}: {generator_answer}")
-
+                
                 steps.append({
                     "round": round,
                     "generator_prompt": generator_prompt,

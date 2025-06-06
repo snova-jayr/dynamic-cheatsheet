@@ -307,7 +307,7 @@ def test_fin_tasks(args, data_name="xbrl_finer", prompt_fun=None):
             })
 
         cheatsheet = output_dict["final_cheatsheet"]
-        final_answer = output_dict["final_output"]
+        final_answer = output_dict["final_answer"]
 
         print(f"@ CHEATSHEET:\n{cheatsheet}\n")
         print('- ' * 50)
