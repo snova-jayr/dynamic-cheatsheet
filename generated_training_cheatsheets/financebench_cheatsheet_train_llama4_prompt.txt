@@ -1,0 +1,23 @@
+Version: 1.0
+
+SOLUTIONS, IMPLEMENTATION PATTERNS, AND CODE SNIPPETS
+<memory_item>
+Identifying Largest Liability in a Balance Sheet
+Briefly describe the problem context, purpose, and key aspects of the solution. 
+The task involves analyzing a company's balance sheet to determine its largest liability. 
+In the context of American Express's 2022 balance sheet, the solution requires identifying the liability with the highest value.
+</description>
+<example>
+In American Express's 2022 balance sheet, the largest liability was "Customer deposits" with a value of $110,239 million.
+</example>
+** Count:  1
+
+
+GENERAL META-REASONING STRATEGIES
+<memory_item>
+Analyzing Financial Statements
+Describe high-level problem-solving frameworks and heuristics for tackling complex problems related to financial statements.
+When analyzing financial statements, focus on identifying key items such as assets, liabilities, and shareholders' equity. 
+Compare values across different years or quarters to understand trends and changes.
+</memory_item>
+** Count:  1
