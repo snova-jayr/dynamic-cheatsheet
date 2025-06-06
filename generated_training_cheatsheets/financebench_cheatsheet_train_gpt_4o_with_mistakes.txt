@@ -1,0 +1,75 @@
+Version: 41.0
+
+SOLUTIONS, IMPLEMENTATION PATTERNS, AND CODE SNIPPETS
+<memory_item>
+<description>
+To extract restructuring costs from financial statements:
+1. Locate the section or note explicitly detailing restructuring and impairment charges.
+2. Identify the total restructuring costs for the specified fiscal year.
+3. Ensure the value is directly outlined and not inferred from other calculations. (Reference: Q51)
+</description>
+<example>
+# Example: Extracting Restructuring Costs
+# Input Data:
+# Restructuring Costs FY2022: $411 million
+
+restructuring_costs_2022 = 411  # Directly outlined in the financial statement
+
+print(f"Restructuring Costs for FY2022: ${restructuring_costs_2022} million")
+# Output: Restructuring Costs for FY2022: $411 million
+</example>
+** Count: 1 **
+
+<memory_item>
+<description>
+To validate financial data extraction:
+1. Cross-check extracted values with the financial statement to ensure accuracy.
+2. Confirm the fiscal year and category (e.g., restructuring costs, impairment charges).
+3. Use clear documentation to avoid misinterpretation. (Reference: Q51)
+</description>
+<example>
+# Example: Validating Restructuring Costs
+# Input Data:
+# Restructuring Costs FY2022: $411 million
+
+assert restructuring_costs_2022 == 411, "Restructuring costs for FY2022 should match the financial statement."
+
+print(f"Validated Restructuring Costs for FY2022: ${restructuring_costs_2022} million")
+# Output: Validated Restructuring Costs for FY2022: $411 million
+</example>
+** Count: 1 **
+
+GENERAL META-REASONING STRATEGIES
+<memory_item>
+<description>
+For extracting specific financial metrics:
+1. Focus on the relevant section or note in the financial statement (e.g., restructuring costs, impairment charges).
+2. Ensure the metric is explicitly outlined and not inferred.
+3. Validate the extracted value against the document to ensure accuracy. (Reference: Q51)
+</description>
+<example>
+# Example: High-Level Strategy for Extracting Financial Metrics
+# Step 1: Locate the section detailing restructuring costs.
+# Step 2: Extract the total costs for the specified fiscal year.
+# Step 3: Validate the extracted value against the financial statement.
+</example>
+** Count: 1 **
+
+<memory_item>
+<description>
+For interpreting financial statement notes:
+1. Identify the relevant note (e.g., restructuring and impairment charges).
+2. Extract key figures directly outlined in the note.
+3. Validate findings to ensure alignment with the financial statement. (Reference: Q51)
+</description>
+<example>
+# Example: Interpreting Financial Statement Notes
+# Input Data:
+# Restructuring Costs FY2022: $411 million
+
+restructuring_costs_2022 = 411  # Directly outlined in the financial statement
+
+print(f"Key Insight: Restructuring Costs for FY2022 amounted to ${restructuring_costs_2022} million")
+# Output: Key Insight: Restructuring Costs for FY2022 amounted to $411 million
+</example>
+** Count: 1 **
