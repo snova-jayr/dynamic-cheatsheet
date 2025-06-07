@@ -1,23 +1,272 @@
-Version: 1.0
+Version: 37.0
 
 SOLUTIONS, IMPLEMENTATION PATTERNS, AND CODE SNIPPETS
 <memory_item>
-Identifying Largest Liability in a Balance Sheet
-Briefly describe the problem context, purpose, and key aspects of the solution. 
-The task involves analyzing a company's balance sheet to determine its largest liability. 
-In the context of American Express's 2022 balance sheet, the solution requires identifying the liability with the highest value.
+<description>
+To determine the remaining cost associated with a future event, such as spinning off a subsidiary, calculate the percentage of the total expected cost that has not yet been incurred. (Reference: Previous Input)
 </description>
 <example>
-In American Express's 2022 balance sheet, the largest liability was "Customer deposits" with a value of $110,239 million.
-</example>
-** Count:  1
+For Pfizer's spin-off of Upjohn:
+1. Identify the total expected cost: $700 million.
+2. Determine the percentage already incurred: 90%.
+3. Calculate the remaining cost: $700 million * (1 - 0.90) = $70 million.
 
+Example Python code to compute the remaining cost:
+```python
+total_expected_cost = 700  # in millions
+percentage_incurred = 0.90
+
+remaining_cost = total_expected_cost * (1 - percentage_incurred)
+print(f"Remaining Cost: {remaining_cost} million")
+```
+</example>
+</memory_item>
+**Count: 1**
+
+<memory_item>
+<description>
+Calculating unadjusted EBITDA less capex involves determining the unadjusted EBITDA by adding depreciation and amortization to the operating income, then subtracting capital expenditures. This metric is crucial for assessing a company's operational profitability and investment in capital expenditures. (Reference: Previous Input)
+</description>
+<example>
+...
+</example>
+</memory_item>
+**Count: 1**
+
+<memory_item>
+<description>
+To calculate the working capital ratio, divide the total current assets by the total current liabilities. This metric is essential for evaluating a company's short-term liquidity and financial health. (Reference: Current Input, Previous Input)
+</description>
+<example>
+For Block (formerly Square) FY2016:
+1. Identify total current assets: $1,001,425 thousand.
+2. Identify total current liabilities: $577,464 thousand.
+3. Calculate the working capital ratio: $1,001,425 / $577,464 ≈ 1.73.
+
+For General Mills FY2020:
+1. Identify total current assets: $5,121.3 million.
+2. Identify total current liabilities: $7,491.5 million.
+3. Calculate the working capital ratio: $5,121.3 / $7,491.5 ≈ 0.68.
+
+Example Python code to compute the working capital ratio:
+```python
+# For Block FY2016
+total_current_assets = 1001425  # in thousands
+total_current_liabilities = 577464  # in thousands
+working_capital_ratio = total_current_assets / total_current_liabilities
+print(f"Working Capital Ratio for Block FY2016: {working_capital_ratio:.2f}")
+
+# For General Mills FY2020
+total_current_assets = 5121.3  # in millions
+total_current_liabilities = 7491.5  # in millions
+working_capital_ratio = total_current_assets / total_current_liabilities
+print(f"Working Capital Ratio for General Mills FY2020: {working_capital_ratio:.2f}")
+```
+</example>
+</memory_item>
+**Count: 2**
+
+<memory_item>
+<description>
+To calculate the dividend payout ratio, divide the total cash dividends paid by the net income attributable to shareholders. This metric is crucial for understanding the proportion of earnings distributed to shareholders. (Reference: Previous Input)
+</description>
+<example>
+For Coca Cola FY2022:
+1. Identify total cash dividends paid: $7,616 million.
+2. Identify net income attributable to shareholders: $9,542 million.
+3. Calculate the dividend payout ratio: $7,616 / $9,542 ≈ 0.80.
+
+Example Python code to compute the dividend payout ratio:
+```python
+total_cash_dividends_paid = 7616  # in millions
+net_income_attributable_to_shareholders = 9542  # in millions
+
+dividend_payout_ratio = total_cash_dividends_paid / net_income_attributable_to_shareholders
+print(f"Dividend Payout Ratio: {dividend_payout_ratio:.2f}")
+```
+</example>
+</memory_item>
+**Count: 1**
+
+<memory_item>
+<description>
+To identify the largest liability in a company's balance sheet, review the liabilities section and compare the values of different liability accounts. (Reference: Previous Input)
+</description>
+<example>
+For American Express's Balance Sheet in 2022:
+1. Identify the different liability accounts: Customer deposits, Accounts payable, Short-term borrowings, Long-term debt, Other liabilities.
+2. Compare their values: Customer deposits ($110,239 million), Accounts payable ($12,133 million), Short-term borrowings ($1,348 million), Long-term debt ($42,573 million), Other liabilities ($37,350 million).
+3. Determine the largest liability: Customer deposits ($110,239 million).
+
+Example insight:
+Customer deposits were the largest liability for American Express in 2022.
+</example>
+</memory_item>
+**Count: 1**
+
+<memory_item>
+<description>
+To determine which activity brought in the most cash flow among operations, investing, and financing activities, review the Consolidated Statements of Cash Flows. (Reference: Current Input)
+</description>
+<example>
+For AMD in FY2022:
+1. Identify the net cash provided by operating activities: $1,071 million.
+2. Identify the net cash used in investing activities: -$686 million.
+3. Identify the net cash used in financing activities: -$3,702 million.
+4. Compare the values: Operating activities ($1,071 million), Investing activities (-$686 million), Financing activities (-$3,702 million).
+5. Determine which activity brought in the most cash flow: Operating activities.
+
+Example insight:
+AMD brought in the most cash flow from operating activities in FY2022.
+
+Example Python code to compare cash flows:
+```python
+operating_cash_flow = 1071  # in millions
+investing_cash_flow = -686  # in millions
+financing_cash_flow = -3702  # in millions
+
+cash_flows = {
+    "Operating": operating_cash_flow,
+    "Investing": investing_cash_flow,
+    "Financing": financing_cash_flow
+}
+
+max_cash_flow_activity = max(cash_flows, key=cash_flows.get)
+print(f"The activity that brought in the most cash flow for AMD in FY2022 was: {max_cash_flow_activity}")
+```
+</example>
+</memory_item>
+**Count: 1**
+
+<memory_item>
+<description>
+To identify restructuring costs directly outlined in a company's income statement, review the relevant notes to the financial statements, such as the section on restructuring and impairment charges. (Reference: Current Input)
+</description>
+<example>
+For Pepsico FY2022:
+1. Review Note 3 ― Restructuring and Impairment Charges in the financial statements.
+2. Identify the total restructuring and impairment charges: $411 million.
+
+Example insight:
+Pepsico's restructuring costs in FY2022 amounted to $411 million.
+
+Example Python code to extract restructuring costs:
+```python
+restructuring_costs = 411  # in millions
+print(f"Pepsico's restructuring costs in FY2022: {restructuring_costs} million")
+```
+</example>
+</memory_item>
+**Count: 1**
 
 GENERAL META-REASONING STRATEGIES
 <memory_item>
-Analyzing Financial Statements
-Describe high-level problem-solving frameworks and heuristics for tackling complex problems related to financial statements.
-When analyzing financial statements, focus on identifying key items such as assets, liabilities, and shareholders' equity. 
-Compare values across different years or quarters to understand trends and changes.
+<description>
+When analyzing financial statements and management discussions, it's essential to identify key future commitments or expected costs, such as those associated with business restructuring or divestitures. (Reference: Previous Input)
+</description>
+<example>
+To apply this strategy:
+1. Review the Management's Discussion and Analysis (MD&A) section for relevant information.
+2. Identify any discussions on future costs or commitments.
+3. Extract and calculate the relevant financial implications.
+
+Example insight:
+Pfizer expected to incur $700 million in costs associated with separating Upjohn, with 90% incurred by the second quarter of 2023, leaving $70 million as the remaining cost.
+</example>
 </memory_item>
-** Count:  1
+**Count: 1**
+
+<memory_item>
+<description>
+When evaluating a company's financial health, calculating key ratios such as the working capital ratio is crucial. This involves identifying relevant financial data from balance sheets or other financial statements. (Reference: Current Input, Previous Input)
+</description>
+<example>
+To apply this strategy:
+1. Extract total current assets and total current liabilities from the balance sheet.
+2. Calculate the working capital ratio by dividing total current assets by total current liabilities.
+3. Round the result to the required decimal places.
+
+Example insight:
+- Block's working capital ratio for FY2016 was approximately 1.73.
+- General Mills's working capital ratio for FY2020 was approximately 0.68.
+</example>
+</memory_item>
+**Count: 2**
+
+<memory_item>
+<description>
+To assess a company's dividend policy, calculating the dividend payout ratio is essential. This involves using data from the cash flow statement and income statement. (Reference: Previous Input)
+</description>
+<example>
+To apply this strategy:
+1. Extract total cash dividends paid from the cash flow statement.
+2. Extract net income attributable to shareholders from the income statement.
+3. Calculate the dividend payout ratio by dividing total cash dividends paid by net income attributable to shareholders.
+
+Example insight:
+Coca Cola's dividend payout ratio for FY2022 was approximately 0.80, indicating the proportion of earnings distributed to shareholders.
+</example>
+</memory_item>
+**Count: 1**
+
+<memory_item>
+<description>
+To identify the largest liability in a company's balance sheet, compare the values of different liability accounts listed in the liabilities section. (Reference: Previous Input)
+</description>
+<example>
+To apply this strategy:
+1. Review the balance sheet and locate the liabilities section.
+2. Identify and compare the values of different liability accounts.
+3. Determine which liability account has the largest value.
+
+Example insight:
+American Express's largest liability in 2022 was customer deposits, amounting to $110,239 million.
+</example>
+</memory_item>
+**Count: 1**
+
+<memory_item>
+<description>
+To determine which activity brought in the most cash flow among operations, investing, and financing activities, compare the net cash provided or used by each activity as reported in the Consolidated Statements of Cash Flows. (Reference: Current Input)
+</description>
+<example>
+To apply this strategy:
+1. Extract the net cash provided by operating activities, net cash used in investing activities, and net cash used in financing activities from the Consolidated Statements of Cash Flows.
+2. Compare the values to determine which activity brought in the most cash flow or lost the least.
+
+Example insight:
+AMD brought in the most cash flow from operating activities in FY2022, with $1,071 million.
+
+Example Python code to compare cash flows:
+```python
+operating_cash_flow = 1071  # in millions
+investing_cash_flow = -686  # in millions
+financing_cash_flow = -3702  # in millions
+
+cash_flows = {
+    "Operating": operating_cash_flow,
+    "Investing": investing_cash_flow,
+    "Financing": financing_cash_flow
+}
+
+max_cash_flow_activity = max(cash_flows, key=cash_flows.get)
+print(f"The activity that brought in the most cash flow was: {max_cash_flow_activity}")
+```
+</example>
+</memory_item>
+**Count: 1**
+
+<memory_item>
+<description>
+To identify restructuring costs directly outlined in a company's income statement, review the relevant notes to the financial statements. (Reference: Current Input)
+</description>
+<example>
+To apply this strategy:
+1. Locate the note related to restructuring and impairment charges in the financial statements.
+2. Extract the total restructuring and impairment charges.
+
+Example insight:
+Pepsico's restructuring costs in FY2022 amounted to $411 million.
+</example>
+</memory_item>
+**Count: 1**
