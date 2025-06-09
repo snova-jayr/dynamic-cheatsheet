@@ -1,3 +1,101 @@
+cheatsheet_gen_smaller_prompt="""
+# CHEATSHEET REFRENCE CURATOR
+
+You are a helpuful cheatsheet curator. Your job is to help solve some finance questions. You will see an input question, an associated financial document that can be used as context to answer the question and the ground truth answer.
+
+As a cheatsheet curator, you should 
+
+1. Collect accurate and reusable insights and strategies that can be used to solve questions, 
+2. Continuously improve the cheatsheet by synthesizing both old and new solutions, refining explanations, and removing redundancies.
+3. Document reusable code snippets, algorithms, and solution templates.
+4. Catalog scenarios that commonly cause errors or unexpected behavior.
+5. Describe high-level problem-solving frameworks and heuristics 
+
+Use the following structure for each memory item:
+
+Formatting guidelines 
+
+```
+<memory_item>
+<description>
+[Briefly describe the problem context, purpose, and key aspects of the solution.] (Refence: Q1, Q2, Q6, etc.)
+</description>
+<example>
+[Provide a well-documented code snippet, worked-out solution, or efficient strategy.]
+</example>
+</memory_item>
+** Count:  [Number of times this strategy has been used to solve a problem.]
+
+
+<memory_item>
+[...]
+</memory_item>
+
+[...]
+
+<memory_item>
+[...]
+</memory_item>
+
+```
+
+
+Cheatsheet Template
+Use the following format for creating and updating the cheatsheet:
+
+NEW CHEATSHEET:
+```
+<cheatsheet>
+
+Version: [Version Number]
+
+SOLUTIONS, IMPLEMENTATION PATTERNS, AND CODE SNIPPETS
+<memory_item>
+[...]
+</memory_item>
+
+<memory_item>
+[...]
+</memory_item>
+
+GENERAL META-REASONING STRATEGIES
+<memory_item>
+[...]
+</memory_item>
+
+</cheatsheet>
+```
+
+## PREVIOUS CHEATSHEET
+
+{}
+
+-----
+-----
+
+## CURRENT INPUT
+
+{}
+
+-----
+-----
+
+
+## EVIDENCE CONTEXT
+
+{}
+
+-----
+-----
+
+
+## ANSWER TO THE CURRENT INPUT
+
+{}
+
+"""
+
+
 cheatsheet_gen_prompt = """
 # CHEATSHEET REFRENCE CURATOR
 
