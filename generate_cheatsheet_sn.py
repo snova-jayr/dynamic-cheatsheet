@@ -5,15 +5,12 @@ import openai
 import time 
 import random 
 
-openai.api_type = "azure"
-openai.api_key = "983d9e08a78c4c2d8e89dcfac2de5605"
-openai.api_base = "https://snova.openai.azure.com"
-openai.api_version = "2024-12-01-preview"
-openai.azure_endpoint="https://snova.openai.azure.com/"
-
+api_key = "9bee3459-3e28-47b9-b0e6-2e54b923ab49"
+base_url = "https://api.sambanova.ai/v1"
 
 dataset_path = "/import/ml-sc-scratch2/shubhangiu/jays_dc_repo/dynamic-cheatsheet/data/finlora/train/financebench_train.jsonl"
 
+client = openai.OpenAI(api_key=api_key, base_url=base_url)
 
 with open(dataset_path, 'r') as json_file:
     all_samples = list(json_file)
@@ -34,18 +31,13 @@ for sample in all_samples:
     gt_answer = task_dict["target"]
    
     # generate cheatsheet
-    prompt = cheatsheet_gen_smaller_prompt.format(old_cheatsheet, question, context, gt_answer)
+    prompt = cheatsheet_gen_prompt.format(old_cheatsheet, question, context, gt_answer)
 
-    response = openai.ChatCompletion.create(
-                    engine="Internal_Copilot",
-                    messages=[
-                      {
-                         "role": "user",
-                         "content": prompt
-                      }
-                    ],
-                temperature=0.0
-    )
+    response = client.chat.completions.create(
+                    model="Llama-4-Maverick-17B-128E-Instruct",
+                    messages=[{"role": "user", "content": prompt}],
+                    temperature=0.0
+                )
 
     response = response.choices[0].message.content
     new_cheatsheet = extract_cheatsheet(response, old_cheatsheet)
@@ -53,4 +45,4 @@ for sample in all_samples:
     question_counts += 1
 
 # save generated cheatsheet
-open("generated_training_cheatsheets/financebench_cheatsheet_train_gpt_4o_smaller_prompt.txt", "w+").write(new_cheatsheet)
+open("generated_training_cheatsheets/financebench_cheatsheet_train_llama4_prompt.txt", "w+").write(new_cheatsheet)

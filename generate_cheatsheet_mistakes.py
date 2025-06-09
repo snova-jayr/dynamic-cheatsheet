@@ -5,7 +5,7 @@ import openai
 import time 
 
 openai.api_type = "azure"
-openai.api_key = ""
+openai.api_key = "983d9e08a78c4c2d8e89dcfac2de5605"
 openai.api_base = "https://snova.openai.azure.com"
 openai.api_version = "2024-12-01-preview"
 openai.azure_endpoint="https://snova.openai.azure.com/"
@@ -37,7 +37,7 @@ for index, sample in enumerate(all_samples):
     gt_answer = task_dict["target"]
    
     # generate cheatsheet
-    prompt = cheatsheet_gen_prompt.format(old_cheatsheet, question, context, gt_answer)
+    prompt = cheatsheet_gen_smaller_prompt.format(old_cheatsheet, question, context, gt_answer)
 
     response = openai.ChatCompletion.create(
                     engine="Internal_Copilot",
@@ -56,4 +56,4 @@ for index, sample in enumerate(all_samples):
     question_counts += 1
 
 # save generated cheatsheet
-open("generated_training_cheatsheets/financebench_cheatsheet_train_gpt_4o_with_mistakes.txt", "w+").write(new_cheatsheet)
+open("generated_training_cheatsheets/financebench_cheatsheet_train_gpt_4o_with_mistakes_smaller_prompt.txt", "w+").write(new_cheatsheet)
