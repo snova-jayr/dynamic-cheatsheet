@@ -31,7 +31,7 @@ for sample in all_samples:
     gt_answer = task_dict["target"]
    
     # generate cheatsheet
-    prompt = cheatsheet_gen_prompt.format(old_cheatsheet, question, context, gt_answer)
+    prompt = cheatsheet_gen_smaller_prompt.format(old_cheatsheet, question, context, gt_answer)
 
     response = client.chat.completions.create(
                     model="Llama-4-Maverick-17B-128E-Instruct",
@@ -45,4 +45,4 @@ for sample in all_samples:
     question_counts += 1
 
 # save generated cheatsheet
-open("generated_training_cheatsheets/financebench_cheatsheet_train_llama4_prompt.txt", "w+").write(new_cheatsheet)
+open("generated_training_cheatsheets/financebench_cheatsheet_train_llama4_smaller_prompt.txt", "w+").write(new_cheatsheet)
