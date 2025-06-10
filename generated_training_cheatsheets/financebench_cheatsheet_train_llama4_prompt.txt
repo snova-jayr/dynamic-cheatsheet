@@ -269,4 +269,4 @@ Example insight:
 Pepsico's restructuring costs in FY2022 amounted to $411 million.
 </example>
 </memory_item>
-**Count: 1**
+*Count: 1**
