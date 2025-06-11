@@ -10,3 +10,8 @@ python  generate_cheatsheet.py --dataset_path /import/ml-sc-scratch2/shubhangiu/
 python generate_cheatsheet_sn.py --dataset_path /import/ml-sc-scratch2/shubhangiu/jays_dc_repo/dynamic-cheatsheet/data/finlora/train/financebench_train.jsonl --num_samples 50 --save_path generated_training_cheatsheets/trial_cheatsheet.txt --model_name Llama-4-Maverick-17B-128E-Instruct 
 ```
 
+## generate cheatsheet with reflection 
+
+```
+python  generate_cheatsheet_with_reflection.py --dataset_path /import/ml-sc-scratch2/shubhangiu/jays_dc_repo/dynamic-cheatsheet/data/finlora/train/financebench_train.jsonl  --save_path generated_training_cheatsheets/trial_cheatsheet.txt --num_samples 50
+```
