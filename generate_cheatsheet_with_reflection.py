@@ -3,14 +3,16 @@ import ast
 import json
 import openai
 import random 
+import re 
 import time 
+from metrics import qa_score 
 
 from utils_reflection import *
 
 
 #### API key information ####
 
-api_key = "9bee3459-3e28-47b9-b0e6-2e54b923ab49"
+api_key = "6522ed42-dfa0-4f55-8231-5b6f9e2a9174"
 base_url = "https://api.sambanova.ai/v1"
 
 ###---------------------####
@@ -55,42 +57,16 @@ def extract_answer(
     Returns:
         str : The extracted final answer (if not found, returns "No final answer found").
     """
-    if "<answer>" in response:
-        # <answer> (content) </answer>
-        try:
-            txt = response.split("<answer>")[-1].strip()
-            txt = txt.split("</answer>")[0].strip()
-            return txt
-        except:
-            return "No final answer found"
+
+
+    matches = re.findall(r"Finish\[(.*?)\]", response)
+
+    if matches:
+        last_answer = matches[-1]
+        return last_answer
     else:
-        if not("FINAL ANSWER" in response):
-            return "No final answer found"
-        try:
-            response = response.split("FINAL ANSWER")[-1].strip()
-            if response[0] == ":":
-                response = response[1:].strip()
+        return "No final answer found"
 
-            # First decide whether to split by "```" or "'''" based on the presence of "```" or "'''"
-            idx_1 = response.find("'''")
-            idx_2 = response.find("```")
-            if min(idx_1, idx_2) != -1:
-                if idx_1 < idx_2:
-                    response = response.split("'''")[1].strip()
-                else:
-                    response = response.split("```")[1].strip()
-            else:
-                if idx_1 == -1:
-                    response = response.split("```")[1].strip()
-                else:
-                    response = response.split("'''")[1].strip()
-
-            # Special case for P3-Test task: If the first line contains "python" then remove it
-            if response.split("\n")[0].strip().lower() == "python":
-                response = "\n".join(response.split("\n")[1:]).strip()
-            return response
-        except:
-            return "No final answer found"
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Description of your program.')
@@ -108,6 +84,11 @@ def initialize_client():
     client = openai.OpenAI(api_key=api_key, base_url=base_url)
     return client 
 
+def relaxed_check(final_answer, gt_answer):
+    score = qa_score(final_answer, gt_answer)
+    if score > 0.4: return True 
+    return False 
+    #return (final_answer.lower() in gt_answer.lower() or gt_answer.lower() in final_answer.lower())
 
 def main():
     args = parse_args()
@@ -115,6 +96,10 @@ def main():
 
     with open(args.dataset_path, 'r') as json_file:
         all_samples = list(json_file)
+
+    if args.num_samples != -1: 
+        random.shuffle(all_samples)
+        all_samples = all_samples[:args.num_samples]
 
     question_counts = 1
 
@@ -140,8 +125,8 @@ def main():
 
         gen_response = response.choices[0].message.content
         final_answer = extract_answer(gen_response)
-        
-        if final_answer != gt_answer: 
+    
+        if not relaxed_check(final_answer, gt_answer): 
             for i in range(args.max_num_rounds):
                 # reflect 
                 reflection_prompt = reflector_prompt.format(gen_response, question, context, final_answer, gt_answer)
@@ -161,26 +146,23 @@ def main():
                 )
                 gen_response = response.choices[0].message.content
                 final_answer = extract_answer(gen_response)
-                if final_answer == gt_answer: break 
+                if relaxed_check(final_answer, gt_answer): break 
 
         # generate cheatsheet
-        cur_prompt = curator_prompt.format(old_cheatsheet, question, context, gen_response)
-
+        cur_prompt = curator_prompt.format(reflection, old_cheatsheet, question, gen_response)
+    
         response = client.chat.completions.create(
                     model=args.curator_model,
                     messages=[{"role": "user", "content": cur_prompt}],
                     temperature=0.0
         )
-
         response = response.choices[0].message.content
         new_cheatsheet = extract_cheatsheet(response, old_cheatsheet)
         old_cheatsheet = new_cheatsheet
+
+        # save generated cheatsheet
+        open(f"{args.save_path}/trial_question_{question_counts}.txt", "w+").write(new_cheatsheet)
         question_counts += 1
-        break
-
-    # save generated cheatsheet
-    open(args.save_path, "w+").write(new_cheatsheet)
-
 
 if __name__=="__main__":
     main()
