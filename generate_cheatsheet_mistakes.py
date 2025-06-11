@@ -5,7 +5,7 @@ import openai
 import time 
 
 openai.api_type = "azure"
-openai.api_key = "983d9e08a78c4c2d8e89dcfac2de5605"
+openai.api_key = ""
 openai.api_base = "https://snova.openai.azure.com"
 openai.api_version = "2024-12-01-preview"
 openai.azure_endpoint="https://snova.openai.azure.com/"
