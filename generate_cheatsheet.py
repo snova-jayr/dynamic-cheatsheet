@@ -1,3 +1,4 @@
+import argparse 
 import json
 import ast 
 from utils_cheatsheet import *
@@ -5,38 +6,52 @@ import openai
 import time 
 import random 
 
+#### API key information ####
+
 openai.api_type = "azure"
 openai.api_key = "983d9e08a78c4c2d8e89dcfac2de5605"
 openai.api_base = "https://snova.openai.azure.com"
 openai.api_version = "2024-12-01-preview"
 openai.azure_endpoint="https://snova.openai.azure.com/"
 
+###---------------------####
 
-dataset_path = "/import/ml-sc-scratch2/shubhangiu/jays_dc_repo/dynamic-cheatsheet/data/finlora/train/financebench_train.jsonl"
+
+def parse_args():
+    parser = argparse.ArgumentParser(description='Description of your program.')
+    parser.add_argument("--dataset_path", required=True, type=str)
+    parser.add_argument("--num_samples", default=-1, type=int)
+    parser.add_argument("--save_path", type=str, required=True)
+    args = parser.parse_args()
+    return args
 
 
-with open(dataset_path, 'r') as json_file:
-    all_samples = list(json_file)
+def main():
+    args = parse_args()
 
-random.shuffle(all_samples)
-all_samples = all_samples[:50]
+    with open(args.dataset_path, 'r') as json_file:
+        all_samples = list(json_file)
 
-question_counts = 1
+    if args.num_samples != -1: 
+        random.shuffle(all_samples)
+        all_samples = all_samples[:args.num_samples]
 
-old_cheatsheet = "(empty)"
+    question_counts = 1
 
-for sample in all_samples:
-    time.sleep(60)
-    print(f"==========processing question {question_counts}==========")
-    task_dict = ast.literal_eval(sample)
-    all_context  = task_dict["context"]
-    question, context = all_context.split("\nDocument Pages Context")
-    gt_answer = task_dict["target"]
+    old_cheatsheet = "(empty)"
+
+    for sample in all_samples:
+        time.sleep(60)
+        print(f"==========processing question {question_counts}==========")
+        task_dict = ast.literal_eval(sample)
+        all_context  = task_dict["context"]
+        question, context = all_context.split("\nDocument Pages Context")
+        gt_answer = task_dict["target"]
    
-    # generate cheatsheet
-    prompt = cheatsheet_gen_smaller_prompt.format(old_cheatsheet, question, context, gt_answer)
+        # generate cheatsheet
+        prompt = cheatsheet_gen_prompt.format(old_cheatsheet, question, context, gt_answer)
 
-    response = openai.ChatCompletion.create(
+        response = openai.ChatCompletion.create(
                     engine="Internal_Copilot",
                     messages=[
                       {
@@ -45,12 +60,15 @@ for sample in all_samples:
                       }
                     ],
                 temperature=0.0
-    )
+        )
 
-    response = response.choices[0].message.content
-    new_cheatsheet = extract_cheatsheet(response, old_cheatsheet)
-    old_cheatsheet = new_cheatsheet
-    question_counts += 1
+        response = response.choices[0].message.content
+        new_cheatsheet = extract_cheatsheet(response, old_cheatsheet)
+        old_cheatsheet = new_cheatsheet
+        question_counts += 1
 
-# save generated cheatsheet
-open("generated_training_cheatsheets/financebench_cheatsheet_train_gpt_4o_smaller_prompt.txt", "w+").write(new_cheatsheet)
+    # save generated cheatsheet
+    open(args.save_path, "w+").write(new_cheatsheet)
+
+if __name__ == "__main__":
+    main()
