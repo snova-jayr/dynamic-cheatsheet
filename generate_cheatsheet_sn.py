@@ -9,7 +9,7 @@ import random
 
 #### API key information ####
 
-api_key = "9bee3459-3e28-47b9-b0e6-2e54b923ab49"
+api_key = ""
 base_url = "https://api.sambanova.ai/v1"
 
 ###---------------------####
