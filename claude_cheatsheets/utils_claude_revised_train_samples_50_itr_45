@@ -1,0 +1,70 @@
+## STEP-BY-STEP METHODOLOGY
+1. **Understand the Context**: Carefully read the sentence to grasp the financial concept being discussed, paying attention to specific transactions or events.
+2. **Identify Key Entities**: Determine the specific entity (e.g., percentage, amount, price per share) mentioned in the sentence.
+3. **Match Entity to Concept**: Relate the entity to the relevant financial concept based on the context.
+4. **Select Relevant Tag**: Choose the US GAAP tag that most accurately represents the identified concept.
+5. **Verify Contextual Clues**: Ensure contextual clues support the selected tag.
+6. **Apply Decision-Making Process**: Select the most appropriate tag based on context and entity type.
+
+## KEY PATTERNS & TRIGGERS
+- **Compensation Expense Context**: "compensation related to restricted common stock granted"
+  - Triggers: "AllocatedShareBasedCompensationExpense"
+- **Income Tax Expense/Benefit Context**: "income taxes", "provision for income taxes", "benefit from income taxes"
+  - Triggers: "IncomeTaxExpenseBenefit"
+- **Effective Tax Rate Reconciliation Context**: "statutory corporate tax rate"
+  - Triggers: "EffectiveIncomeTaxRateReconciliationAtFederalStatutoryIncomeTaxRate"
+- **Loss Contingency Context**: "damages sought", "accrued a contingent liability"
+  - Triggers: "LossContingencyDamagesSoughtValue", "LossContingencyAccrualAtCarryingValue", "AccrualForEnvironmentalLossContingencies"
+- **Revenue from Related Parties Context**: "revenue from sales of services to [related party]", "revenue from related parties"
+  - Triggers: "RevenueFromRelatedParties"
+- **Debt Instrument Context**: "senior notes", "tax-exempt financings", "interest rate", "face amount", "carrying amount"
+  - Triggers: "DebtInstrumentFaceAmount", "DebtInstrumentInterestRateStatedPercentage", "DebtInstrumentCarryingAmount"
+- **Debt Issuance Costs Context**: "debt issuance costs", "capitalized as debt issuance costs"
+  - Triggers: "DeferredFinanceCostsGross"
+- **Loss on Extinguishment of Debt Context**: "loss on extinguishment of debt", "unamortized debt issuance costs"
+  - Triggers: "GainsLossesOnExtinguishmentOfDebt"
+- **Line of Credit Facility Context**: "committed lines of credit", "credit facilities", "maximum borrowing capacity", "remaining borrowing capacity", "available unused credit"
+  - Triggers: "LineOfCreditFacilityMaximumBorrowingCapacity", "LineOfCreditFacilityRemainingBorrowingCapacity"
+- **Antidilutive Securities Context**: "anti-dilutive", "excludes [number] common stock equivalents"
+  - Triggers: "AntidilutiveSecuritiesExcludedFromComputationOfEarningsPerShareAmount"
+- **Restricted Stock Units Context**: "restricted stock units"
+  - Triggers: "NumberOfSharesExcludedFromComputationOfEarningsPerShare"
+- **Profit Sharing Expense Context**: "profit sharing expense"
+  - Triggers: "DefinedContributionPlanCostRecognized"
+- **Rental Expense Context**: "rental expense"
+  - Triggers: "OperatingLeasesRentExpenseNet"
+- **Disposal Group Context**: "selling price", "disposal of assets"
+  - Triggers: "DisposalGroupIncludingDiscontinuedOperationConsideration"
+- **Restructuring Charges Context**: "restructuring accrual", "losses from disposition of assets"
+  - Triggers: "RestructuringCharges"
+- **Asset Impairment Charges Context**: "asset impairment charge", "impairment charges against inventories and certain long-term nonmonetary assets"
+  - Triggers: "AssetImpairmentCharges"
+
+## TAG MAPPING RULES
+- **Entities related to "compensation expense"**: Use "AllocatedShareBasedCompensationExpense".
+- **Entities related to "income tax expense/benefit"**: Use "IncomeTaxExpenseBenefit".
+- **Entities related to "effective tax rate reconciliation"**: Use "EffectiveIncomeTaxRateReconciliationAtFederalStatutoryIncomeTaxRate".
+- **Entities related to "loss contingency" or "damages sought"**: Use "LossContingencyDamagesSoughtValue" if representing damages sought; use "LossContingencyAccrualAtCarryingValue" or "AccrualForEnvironmentalLossContingencies" if representing an accrued liability.
+- **Entities related to "revenue from related parties"**: Use "RevenueFromRelatedParties".
+- **Entities related to "debt instruments"**:
+  - Use "DebtInstrumentFaceAmount" for the face amount or nominal value.
+  - Use "DebtInstrumentInterestRateStatedPercentage" for the stated interest rate of fixed-rate debt instruments.
+  - Use "DebtInstrumentCarryingAmount" for the carrying amount.
+- **Entities related to "debt issuance costs"**: Use "DeferredFinanceCostsGross".
+- **Entities related to "loss on extinguishment of debt"**: Use "GainsLossesOnExtinguishmentOfDebt".
+- **Entities related to "line of credit facilities"**:
+  - Use "LineOfCreditFacilityMaximumBorrowingCapacity" for the total or aggregate credit available.
+  - Use "LineOfCreditFacilityRemainingBorrowingCapacity" for the unused or available credit.
+- **Entities related to "antidilutive securities"**: Use "AntidilutiveSecuritiesExcludedFromComputationOfEarningsPerShareAmount".
+- **Entities related to "restricted stock units"**: Use "NumberOfSharesExcludedFromComputationOfEarningsPerShare".
+- **Entities related to "profit sharing expense"**: Use "DefinedContributionPlanCostRecognized".
+- **Entities related to "rental expense"**: Use "OperatingLeasesRentExpenseNet".
+- **Entities related to "disposal group"**: Use "DisposalGroupIncludingDiscontinuedOperationConsideration".
+- **Entities related to "restructuring charges"**: Use "RestructuringCharges".
+- **Entities related to "asset impairment charges"**: Use "AssetImpairmentCharges".
+
+## CODE SNIPPETS & TEMPLATES
+```python
+def map_to_us_gaap_tag(context, entity):
+    context = context.lower()
+    if "compensation related to restricted common stock" in context" in context"

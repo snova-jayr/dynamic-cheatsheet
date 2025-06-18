@@ -1,0 +1,120 @@
+## STEP-BY-STEP METHODOLOGY
+1. **Understand the Context**: Carefully read the sentence to grasp the financial concept being discussed.
+2. **Identify Key Entities**: Determine the specific entity (e.g., percentage, amount, price per share) mentioned in the sentence.
+3. **Match Entity to Concept**: Relate the entity to the relevant financial concept (e.g., credit facility, ownership percentage, pension contributions, restructuring costs, stock prices).
+4. **Select Relevant Tag**: Choose the US GAAP tag that most accurately represents the identified concept.
+5. **Verify Contextual Clues**: Ensure that contextual clues support the selected tag.
+
+## KEY PATTERNS & TRIGGERS
+- **Credit Facility Context**:
+  - "amount available under the facility"
+  - "outstanding letter of credit"
+  - "revolving credit line"
+  - Triggers: "LineOfCreditFacilityRemainingBorrowingCapacity", "LineOfCreditFacilityMaximumBorrowingCapacity", "LettersOfCreditOutstandingAmount"
+- **Ownership Percentage Context**:
+  - "ownership percentage"
+  - "increasing ownership to [percentage] from [percentage]"
+  - Triggers: "MinorityInterestOwnershipPercentageByParent", "EquityMethodInvestmentOwnershipPercentage"
+- **Pension Contributions Context**:
+  - "contributed to the pension plans"
+  - "expects to contribute to the pension plans"
+  - Triggers: "DefinedBenefitPlanContributionsByEmployer"
+- **Tax Rate Context**: 
+  - "federal statutory income tax rate"
+  - "corporate income tax rate"
+  - "effective tax rates"
+  - Triggers: "EffectiveIncomeTaxRateReconciliationAtFederalStatutoryIncomeTaxRate"
+- **Unrecognized Tax Benefits Context**:
+  - "unrecognized tax benefits"
+  - "if recognized, would affect the effective tax rate"
+  - Triggers: "UnrecognizedTaxBenefitsThatWouldImpactEffectiveTaxRate"
+- **Restructuring Costs Context**:
+  - "restructuring charges"
+  - "program charges"
+  - "restructuring costs"
+  - Triggers: "RestructuringCharges", "RestructuringAndRelatedCostExpectedCost1"
+- **Stock Price Context**:
+  - "price per share"
+  - "closing price"
+  - Triggers: "SaleOfStockPricePerShare", "SharePrice"
+
+## TAG MAPPING RULES
+- **Entities related to "amount available under a credit facility"**: Use "LineOfCreditFacilityRemainingBorrowingCapacity".
+- **Entities related to "revolving credit line" or "maximum borrowing capacity"**: Use "LineOfCreditFacilityMaximumBorrowingCapacity".
+- **Entities related to "outstanding letters of credit"**: Use "LettersOfCreditOutstandingAmount".
+- **Entities related to "ownership percentage"**: 
+  - Use "MinorityInterestOwnershipPercentageByParent" if related to minority interest.
+  - Use "EquityMethodInvestmentOwnershipPercentage" if related to equity method investment.
+- **Entities related to "contributions to pension plans"**: Use "DefinedBenefitPlanContributionsByEmployer".
+- **Entities related to "federal statutory income tax rate" or "corporate income tax rate" or "effective tax rates"**: Use "EffectiveIncomeTaxRateReconciliationAtFederalStatutoryIncomeTaxRate".
+- **Entities related to "unrecognized tax benefits" that "if recognized, would affect the effective tax rate"**: Use "UnrecognizedTaxBenefitsThatWouldImpactEffectiveTaxRate".
+- **Entities related to "restructuring charges" or "program charges"**: Use "RestructuringCharges" or "RestructuringAndRelatedCostExpectedCost1" based on context.
+- **Entities related to "price per share" or "unit of stock"**: Use "SaleOfStockPricePerShare".
+- **Entities related to "closing price of shares"**: Use "SharePrice".
+
+## CODE SNIPPETS & TEMPLATES
+```python
+def map_entity_to_tag(sentence, entity):
+    # Simplified example; actual implementation would require NLP or rule-based logic
+    if "amount available under the facility" in sentence:
+        return "LineOfCreditFacilityRemainingBorrowingCapacity"
+    elif "revolving credit line" in sentence:
+        return "LineOfCreditFacilityMaximumBorrowingCapacity"
+    elif "outstanding letters of credit" in sentence:
+        return "LettersOfCreditOutstandingAmount"
+    elif "ownership to" in sentence and "%" in sentence:
+        if "minority interest" in sentence.lower():
+            return "MinorityInterestOwnershipPercentageByParent"
+        else:
+            return "EquityMethodInvestmentOwnershipPercentage"
+    elif "contributed to the pension plans" in sentence:
+        return "DefinedBenefitPlanContributionsByEmployer"
+    elif "federal statutory income tax rate" in sentence or "corporate income tax rate" in sentence or "effective tax rates" in sentence:
+        return "EffectiveIncomeTaxRateReconciliationAtFederalStatutoryIncomeTaxRate"
+    elif "unrecognized tax benefits" in sentence and "if recognized, would affect the effective tax rate" in sentence:
+        return "UnrecognizedTaxBenefitsThatWouldImpactEffectiveTaxRate"
+    elif "restructuring charges" in sentence:
+        return "RestructuringCharges"
+    elif "program charges" in sentence or "restructuring costs" in sentence:
+        return "RestructuringAndRelatedCostExpectedCost1"
+    elif "price per share" in sentence or "price per unit" in sentence:
+        return "SaleOfStockPricePerShare"
+    elif "closing price" in sentence:
+        return "SharePrice"
+    else:
+        return "Unknown"
+
+# Example usage
+sentences = [
+    "The Tax Cuts and Jobs Act of 2017 reduced the corporate income tax rate to 21% beginning in 2018.",
+    "Included in the balance of unrecognized tax benefits at December 31, 2018, are $72.8 of tax benefits that, if recognized, would affect the effective tax rate.",
+    "At September 30 , 2017 , an outstanding letter of credit under the credit facility totaled $ 12.5 million and the amount available under the facility totaled $ 62.5 million based upon eligible accounts receivable and inventory balances .",
+    "In the first quarter of 2016 , the Company acquired $ 25 million of additional shares in the consortium owning Voltyre - Prom , increasing Titan 's ownership to 43 % from 30 % .",
+    "The Company contributed approximately $ 2.1 million to the pension plans during the nine months ended September 30 , 2017 , and expects to contribute approximately $ 1.2 million to the pension plans during the remainder of 2017 .",
+    "At September 29 , 2018 , there was $ 252.0 million outstanding on the revolving credit facility and there remains $ 246.9 million available , net of outstanding letters of credit .",
+    "The credit facility allocates up to $ 20 million of the $ 500 million revolving credit line for the issuance of letters of credit , including certain existing letters of credit .",
+    "At September 29 , 2018 , outstanding letters of credit totaled $ 1.1 million .",
+    "The effective tax rates were approximately ( 9.1 ) % and 29.9 % for the three months ended and 6.5 % and 27.0 % for the nine months ended September 29 , 2018 and September 30 , 2017 , respectively .",
+    "The total $ 7.7 billion program now consists of $ 5.4 billion of program charges ( $ 4.1 billion of cash costs and $ 1.3 billion of non - cash costs ) and total capital expenditures of $ 2.3 billion to be incurred over the life of the program .",
+    "Restructuring Costs : The Simplify to Grow Program liability activity for the years ended December 31 , 2018 and 2017 was : We recorded restructuring charges of $ 316 million in 2018 , $ 535 million in 2017 and $ 714 million in 2016 within asset impairment and exit costs .",
+    "The aggregate net proceeds to the Company after deducting underwriting discounts and commissions and before offering expenses payable by the Company , was $ 319.7 million . Concurrent with the IPO , the Company completed a private placement with an affiliate of Lennar Corporation ( “ Lennar ” ) in which the Operating Company sold 7,142,857 Class A Common Units of the Operating Company at a price per unit equal to the IPO public offering price per share , and the Holding Company sold an equal number of Class B common shares at a price of $ 0.00633 per share .",
+    "The Holding Company used the proceeds from the sale of the Class B common shares to purchase 7,142,857 Class B Common Units of the Operating Company at a price of $ 0.00633 per unit .",
+    "Assuming the exchange of all outstanding Class A Common Units of the Operating Company , and all outstanding Class A units of the San Francisco Venture ( see ( 2 ) below ) , that are not held by the Company , based on the closing price of the Company ’ s Class A common shares on July 31 , 2018 ( $ 11.19 ) , the equity market capitalization of the Company was approximately $ 1.6 billion .",
+    "The Company owns a 37.5 % Percentage Interest in the Great Park Venture , and serves as its administrative member ."
+]
+entities = ["21", "72.8", "62.5", "43", "2.1", "246.9", "500", "1.1", "9.1", "7.7", "316", "0.00633", "0.00633", "11.19", "37.5"]
+
+tags = [map_entity_to_tag(sentence, entity) for sentence, entity in zip(sentences, entities)]
+print(tags)
+```
+
+## COMMON MISTAKES TO AVOID
+- **Misinterpreting Financial Concepts**: Avoid confusing different financial concepts (e.g., credit facility vs. pension contributions, ownership percentage vs. stock prices).
+- **Overlooking Contextual Clues**: Ensure that the selected tag aligns with the specific context provided in the sentence.
+- **Misinterpreting Tax Rates**: Avoid confusing "EffectiveIncomeTaxRateContinuingOperations" with "EffectiveIncomeTaxRateReconciliationAtFederalStatutoryIncomeTaxRate".
+- **Misclassifying Restructuring Costs**: Ensure that restructuring charges and program charges are correctly identified and tagged.
+- **Misclassifying Ownership Percentages**: Differentiate between "MinorityInterestOwnershipPercentageByParent" and "EquityMethodInvestmentOwnershipPercentage" based on context.
+
+## AMBIGUOUS CASES & RESOLUTION
+- **Unclear Financial Context**: If the sentence does not clearly indicate the financial concept, look for surrounding context or specific keywords.
+- **Multiple Possible Tags**: If more than one tag seems applicable, prioritize the most specific tag that matches the given context.

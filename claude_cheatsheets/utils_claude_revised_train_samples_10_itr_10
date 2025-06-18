@@ -1,0 +1,95 @@
+## STEP-BY-STEP METHODOLOGY
+1. **Understand the Context**: Carefully read the sentence to grasp the financial concept being discussed.
+2. **Identify Key Entities**: Determine the specific entity (e.g., percentage, amount, price per share) mentioned in the sentence.
+3. **Match Entity to Concept**: Relate the entity to the relevant financial concept (e.g., credit facility, ownership percentage, pension contributions, restructuring costs, stock prices, amortization expense, income tax benefit, share-based compensation).
+4. **Select Relevant Tag**: Choose the US GAAP tag that most accurately represents the identified concept.
+5. **Verify Contextual Clues**: Ensure that contextual clues support the selected tag.
+
+## KEY PATTERNS & TRIGGERS
+- **Credit Facility Context**:
+  - "amount available under the facility"
+  - "outstanding letter of credit"
+  - "revolving credit line"
+  - Triggers: "LineOfCreditFacilityRemainingBorrowingCapacity", "LineOfCreditFacilityMaximumBorrowingCapacity", "LettersOfCreditOutstandingAmount"
+- **Ownership Percentage Context**:
+  - "ownership percentage"
+  - "increasing ownership to [percentage] from [percentage]"
+  - Triggers: "MinorityInterestOwnershipPercentageByParent", "EquityMethodInvestmentOwnershipPercentage"
+- **Pension Contributions Context**:
+  - "contributed to the pension plans"
+  - "expects to contribute to the pension plans"
+  - Triggers: "DefinedBenefitPlanContributionsByEmployer"
+- **Tax Rate Context**: 
+  - "federal statutory income tax rate"
+  - "corporate income tax rate"
+  - "effective tax rates"
+  - Triggers: "EffectiveIncomeTaxRateReconciliationAtFederalStatutoryIncomeTaxRate"
+- **Unrecognized Tax Benefits Context**:
+  - "unrecognized tax benefits"
+  - "if recognized, would affect the effective tax rate"
+  - Triggers: "UnrecognizedTaxBenefitsThatWouldImpactEffectiveTaxRate"
+- **Restructuring Costs Context**:
+  - "restructuring charges"
+  - "program charges"
+  - "restructuring costs"
+  - Triggers: "RestructuringCharges", "RestructuringAndRelatedCostExpectedCost1"
+- **Stock Price Context**:
+  - "price per share"
+  - "closing price"
+  - Triggers: "SaleOfStockPricePerShare", "SharePrice"
+- **Amortization Expense Context**:
+  - "amortization expense"
+  - Triggers: "AmortizationOfIntangibleAssets"
+- **Income Tax Benefit Context**:
+  - "income tax benefit"
+  - Triggers: "UnrecognizedTaxBenefitsThatWouldImpactEffectiveTaxRate"
+- **Share-Based Compensation Context**:
+  - "stock options granted"
+  - "vesting period"
+  - "shares reserved for issuance"
+  - Triggers: "ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsGrantsInPeriodGross", "ShareBasedCompensationArrangementByShareBasedPaymentAwardAwardVestingPeriod1", "ShareBasedCompensationArrangementByShareBasedPaymentAwardNumberOfSharesAvailableForGrant"
+
+## TAG MAPPING RULES
+- **Entities related to "amount available under a credit facility"**: Use "LineOfCreditFacilityRemainingBorrowingCapacity".
+- **Entities related to "revolving credit line" or "maximum borrowing capacity"**: Use "LineOfCreditFacilityMaximumBorrowingCapacity".
+- **Entities related to "outstanding letters of credit"**: Use "LettersOfCreditOutstandingAmount".
+- **Entities related to "ownership percentage"**: 
+  - Use "MinorityInterestOwnershipPercentageByParent" if related to minority interest.
+  - Use "EquityMethodInvestmentOwnershipPercentage" if related to equity method investment.
+- **Entities related to "contributions to pension plans"**: Use "DefinedBenefitPlanContributionsByEmployer".
+- **Entities related to "federal statutory income tax rate" or "corporate income tax rate" or "effective tax rates"**: Use "EffectiveIncomeTaxRateReconciliationAtFederalStatutoryIncomeTaxRate".
+- **Entities related to "unrecognized tax benefits" that "if recognized, would affect the effective tax rate"**: Use "UnrecognizedTaxBenefitsThatWouldImpactEffectiveTaxRate".
+- **Entities related to "restructuring charges" or "program charges"**: Use "RestructuringCharges" or "RestructuringAndRelatedCostExpectedCost1" based on context.
+- **Entities related to "price per share" or "unit of stock"**: Use "SaleOfStockPricePerShare".
+- **Entities related to "closing price of shares"**: Use "SharePrice".
+- **Entities related to "amortization expense"**: Use "AmortizationOfIntangibleAssets".
+- **Entities related to "income tax benefit"**: Use "UnrecognizedTaxBenefitsThatWouldImpactEffectiveTaxRate".
+- **Entities related to "stock options granted"**: Use "ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsGrantsInPeriodGross".
+- **Entities related to "vesting period"**: Use "ShareBasedCompensationArrangementByShareBasedPaymentAwardAwardVestingPeriod1".
+- **Entities related to "shares reserved for issuance"**: Use "ShareBasedCompensationArrangementByShareBasedPaymentAwardNumberOfSharesAvailableForGrant".
+
+## CODE SNIPPETS & TEMPLATES
+```python
+def map_entity_to_tag(sentence, entity):
+    # Simplified example; actual implementation would require NLP or rule-based logic
+    if "amount available under the facility" in sentence:
+        return "LineOfCreditFacilityRemainingBorrowingCapacity"
+    elif "revolving credit line" in sentence:
+        return "LineOfCreditFacilityMaximumBorrowingCapacity"
+    elif "outstanding letters of credit" in sentence:
+        return "LettersOfCreditOutstandingAmount"
+    elif "ownership to" in sentence and "%" in sentence:
+        if "minority interest" in sentence.lower():
+            return "MinorityInterestOwnershipPercentageByParent"
+        else:
+            return "EquityMethodInvestmentOwnershipPercentage"
+    elif "contributed to the pension plans" in sentence:
+        return "DefinedBenefitPlanContributionsByEmployer"
+    elif "federal statutory income tax rate" in sentence or "corporate income tax rate" in sentence or "effective tax rates" in sentence:
+        return "EffectiveIncomeTaxRateReconciliationAtFederalStatutoryIncomeTaxRate"
+    elif "unrecognized tax benefits" in sentence and "if recognized, would affect the effective tax rate" in sentence:
+        return "UnrecognizedTaxBenefitsThatWouldImpactEffectiveTaxRate"
+    elif "restructuring charges" in sentence:
+        return "RestructuringCharges"
+    elif "program charges" in sentence or "restructuring costs" in sentence:
+        return "RestructuringAndRelatedCostExpectedCost
