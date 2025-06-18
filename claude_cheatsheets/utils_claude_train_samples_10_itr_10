@@ -1,0 +1,92 @@
+## FINANCIAL STRATEGIES & INSIGHTS
+
+### Understanding US GAAP Concepts and Contextual Analysis
+To accurately identify the correct US GAAP tag, it's crucial to understand the specific concept being referenced in the given context. Analyze the context of the sentence to determine the relevant US GAAP tag. For instance, distinguishing between different types of interest rates and understanding the components of a variable interest rate (e.g., LIBOR plus a basis spread) is vital. Additionally, recognizing context related to restructuring costs, program charges, sale of stock, equity investments, amortization expenses, income tax benefits, share-based compensation arrangements, net operating loss carryforwards, and unrecognized tax benefits is essential.
+
+### Identifying Relevant Concepts for Investments, Credit Facilities, Debt Instruments, Restructuring Costs, Equity Transactions, Intangible Assets, Income Taxes, Share-Based Compensation, and Operating Loss Carryforwards
+When a sentence mentions an investment amount, such as "aggregate investment", the relevant US GAAP tag is likely "EquityMethodInvestments". For sentences related to credit facilities, the tag "LineOfCreditFacilityRemainingBorrowingCapacity" is often relevant when discussing the amount available. For debt instruments with variable interest rates, understanding whether the mentioned rate is the total interest rate or a basis spread is crucial. For sentences related to restructuring costs and program charges, tags like "RestructuringAndRelatedCostExpectedCost1" and "RestructuringCharges" are relevant. For equity transactions, such as the sale of stock, the tag "SaleOfStockPricePerShare" is relevant when discussing the price per share. For share prices, the tag "SharePrice" is applicable. For amortization expenses related to intangible assets, the tag "AmortizationOfIntangibleAssets" is relevant. For income tax benefits, the tag "EffectiveIncomeTaxRateContinuingOperations" is often relevant. For share-based compensation arrangements, tags like "ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsGrantsInPeriodGross", "ShareBasedCompensationArrangementByShareBasedPaymentAwardAwardVestingPeriod1", and "ShareBasedCompensationArrangementByShareBasedPaymentAwardNumberOfSharesAvailableForGrant" are relevant. For net operating loss carryforwards, the tag "OperatingLossCarryforwards" is relevant. For unrecognized tax benefits, the tag "UnrecognizedTaxBenefits" is relevant, and for the portion that would impact the effective tax rate, "UnrecognizedTaxBenefitsThatWouldImpactEffectiveTaxRate" is relevant.
+
+## FORMULAS & CALCULATIONS
+
+### Interest Rate Calculations and Components
+When calculating or identifying interest rates, ensure you're distinguishing between the total interest rate and the basis spread. For variable rate debt instruments, the basis spread is the additional percentage added to a base rate (like LIBOR).
+
+### Amortization of Intangible Assets
+Understand that amortization expenses related to intangible assets are tagged with "AmortizationOfIntangibleAssets".
+
+### Income Tax Benefits and Effective Tax Rates
+For income tax benefits, understand that the relevant tag could be "EffectiveIncomeTaxRateContinuingOperations" when discussing the impact on effective tax rates.
+
+### Share-Based Compensation Arrangements
+For share-based compensation, understand that the number of options granted is tagged with "ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsGrantsInPeriodGross", the vesting period is tagged with "ShareBasedCompensationArrangementByShareBasedPaymentAwardAwardVestingPeriod1", and the number of shares reserved for future grants is tagged with "ShareBasedCompensationArrangementByShareBasedPaymentAwardNumberOfSharesAvailableForGrant".
+
+### Operating Loss Carryforwards
+For net operating loss carryforwards, the relevant tag is "OperatingLossCarryforwards".
+
+### Unrecognized Tax Benefits
+For unrecognized tax benefits, the total amount is tagged with "UnrecognizedTaxBenefits", and the portion that would impact the effective tax rate is tagged with "UnrecognizedTaxBenefitsThatWouldImpactEffectiveTaxRate".
+
+## CODE SNIPPETS & TEMPLATES
+
+### Tagging US GAAP Concepts for Debt Instruments, Restructuring Costs, Equity Transactions, Intangible Assets, Income Taxes, Share-Based Compensation, Operating Loss Carryforwards, and Unrecognized Tax Benefits
+```python
+def get_us_gaap_tag(context, entity):
+    # Example logic for determining the correct US GAAP tag based on context
+    if "LIBOR plus" in context.lower():
+        return "DebtInstrumentBasisSpreadOnVariableRate1"
+    elif "federal statutory income tax rate" in context.lower():
+        return "EffectiveIncomeTaxRateReconciliationAtFederalStatutoryIncomeTaxRate"
+    elif "unrecognized tax benefits" in context.lower() and "of which" in context.lower():
+        if "would impact the effective tax rate" in context.lower():
+            return "UnrecognizedTaxBenefitsThatWouldImpactEffectiveTaxRate"
+        else:
+            return "UnrecognizedTaxBenefits"
+    elif "net operating loss carryforwards" in context.lower():
+        return "OperatingLossCarryforwards"
+    elif "credit facility" in context.lower() and "amount available" in context.lower():
+        return "LineOfCreditFacilityRemainingBorrowingCapacity"
+    elif "aggregate investment" in context.lower():
+        return "EquityMethodInvestments"
+    elif "program charges" in context.lower() or "restructuring costs" in context.lower():
+        if "expected" in context.lower() or "total" in context.lower():
+            return "RestructuringAndRelatedCostExpectedCost1"
+        else:
+            return "RestructuringCharges"
+    elif "sale" in context.lower() and "price per share" in context.lower():
+        return "SaleOfStockPricePerShare"
+    elif "share price" in context.lower():
+        return "SharePrice"
+    elif "amortization expense" in context.lower():
+        return "AmortizationOfIntangibleAssets"
+    elif "income tax benefit" in context.lower():
+        return "EffectiveIncomeTaxRateContinuingOperations"
+    elif "stock options" in context.lower() and "granted" in context.lower():
+        return "ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsGrantsInPeriodGross"
+    elif "vesting after" in context.lower():
+        return "ShareBasedCompensationArrangementByShareBasedPaymentAwardAwardVestingPeriod1"
+    elif "reserved" in context.lower() and "shares for issuance" in context.lower():
+        return "ShareBasedCompensationArrangementByShareBasedPaymentAwardNumberOfSharesAvailableForGrant"
+    # Add more conditions as needed
+
+# Example usage:
+context1 = "On November 2 , 2018 , the interest rate was increased to LIBOR plus 2.13 % due to a step - up based on the senior secured leverage ratio as of September 30 , 2018 ."
+entity1 = "2.13"
+print(get_us_gaap_tag(context1, entity1))  # Output: DebtInstrumentBasisSpreadOnVariableRate1
+
+context2 = "The Company granted 648,180 stock options under the 2016 Plan during the year ended December 31 , 2016 , consisting of 626,650 stock options vesting after four years and 21,530 stock options with various vesting schedules , but all of which vest within a calendar year of the respective grant date ."
+entity2 = "648,180"
+print(get_us_gaap_tag(context2, entity2))  # Output: ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsGrantsInPeriodGross
+
+context3 = "The 2016 Plan has reserved 6,000,000 shares for issuance of RSAs , RSUs or stock options , of which approximately 3.8 million awards were available for future grants as of December 31 , 2018 ."
+entity3 = "6,000,000"
+print(get_us_gaap_tag(context3, entity3))  # Output: ShareBasedCompensationArrangementByShareBasedPaymentAwardNumberOfSharesAvailableForGrant
+
+context4 = "This change is primarily attributable to an increase in current year net operating loss carryforwards of $ 186.5 million and an increase of $ 417.0 million related to the early adoption of ASU 2016 - 09 ' Improvements to Employee Share - Based Payment Accounting ' , upon which previously unrecognized U.S. excess tax effects have been recorded as additional net operating loss carryforwards within our deferred tax asset ."
+entity4 = "186.5"
+print(get_us_gaap_tag(context4, entity4))  # Output: OperatingLossCarryforwards
+
+context5 = "A reconciliation of the beginning and ending balance of total unrecognized tax benefits is as follows ( in thousands ) : As of December 31 , 2016 , we had gross unrecognized tax benefits of approximately $ 18.4 million , of which $ 4.0 million would impact the effective tax rate , if recognized ."
+entity5 = "18.4"
+print(get_us_gaap_tag(context5, entity5))  # Output: UnrecognizedTaxBenefits
+
+context6 = "A reconciliation of the beginning and ending balance of total unrecognized tax benefits is as follows ( in thousands ) : As of

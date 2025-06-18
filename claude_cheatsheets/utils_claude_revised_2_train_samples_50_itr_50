@@ -1,0 +1,91 @@
+## STEP-BY-STEP METHODOLOGY
+To determine the correct US GAAP tag for a given entity, follow these steps:
+1. **Read the sentence carefully**: Understand the context in which the entity is mentioned, paying attention to the surrounding phrases and keywords.
+2. **Identify key phrases and keywords**: Look for phrases that indicate the concept being described, such as financial obligations, guarantees, acquisitions, share-based compensation, or revenue from related parties.
+3. **Match the context to a US GAAP tag**: Use the identified keywords and phrases to determine the most specific and appropriate US GAAP tag. Consider the nuances of the context.
+4. **Disambiguate similar tags**: When multiple tags seem applicable, distinguish between them based on the specific details provided in the context.
+5. **Consider the perspective**: Identify the correct perspective for the tag, such as the parent's or noncontrolling owners' viewpoint.
+6. **Be aware of specific financial concepts**: Recognize that "fair value" measurements of debt instruments are tagged differently than interest expenses or other aspects of debt.
+
+## KEY PATTERNS & TRIGGERS
+* **Share-Based Compensation**:
+	+ "vesting period" -> ShareBasedCompensationArrangementByShareBasedPaymentAwardAwardVestingPeriod1
+	+ "available for future share-based compensation grants" -> ShareBasedCompensationArrangementByShareBasedPaymentAwardNumberOfSharesAvailableForGrant
+	+ "weighted-average grant-date fair value of stock options and SARs" -> ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsGrantsInPeriodWeightedAverageGrantDateFairValue
+	+ "number of shares granted" -> ShareBasedCompensationArrangementByShareBasedPaymentAwardEquityInstrumentsOtherThanOptionsGrantsInPeriod
+* **Business Combinations & Intangible Assets**:
+	+ "goodwill" -> Goodwill
+	+ "developed technology intangible assets" -> BusinessCombinationRecognizedIdentifiableAssetsAcquiredAndLiabilitiesAssumedIntangibles
+	+ "acquired [percentage]% of the outstanding common stock" -> BusinessAcquisitionPercentageOfVotingInterestsAcquired
+* **Loss Contingencies & Environmental Liabilities**:
+	+ "accrued $ [amount] related to this matter" -> LossContingencyEstimateOfPossibleLoss
+	+ "environmental liability, measured on an undiscounted basis, of $ [amount]" -> AccrualForEnvironmentalLossContingencies
+* **Operating Leases & Subleases**:
+	+ "Rental expense relating to operating leases" -> OperatingLeasesRentExpenseNet
+* **Debt Instruments & Credit Facilities**:
+	+ "Interest expense relating to notes payable" -> InterestExpense
+	+ "fair value of Senior Notes" -> LongTermDebtFairValue
+* **Income Taxes**:
+	+ "zero tax provision" -> IncomeTaxExpenseBenefit
+	+ "no income tax benefit" -> IncomeTaxExpenseBenefit
+
+## TAG MAPPING RULES
+* **ShareBasedCompensationArrangementByShareBasedPaymentAwardAwardVestingPeriod1**: Use when the entity represents the vesting period for share-based compensation awards.
+* **ShareBasedCompensationArrangementByShareBasedPaymentAwardNumberOfSharesAvailableForGrant**: Use when the entity represents the number of shares available for future grants under a share-based compensation plan.
+* **ShareBasedCompensationArrangementByShareBasedPaymentAwardEquityInstrumentsOtherThanOptionsGrantsInPeriod**: Use when the entity represents the number of shares granted during a period under a share-based compensation plan.
+* **Goodwill**: Use when the entity represents goodwill arising from a business combination.
+* **BusinessAcquisitionPercentageOfVotingInterestsAcquired**: Use when the entity represents the percentage of voting interests acquired in a business combination.
+* **LossContingencyEstimateOfPossibleLoss**: Use when the entity represents an estimate of possible loss related to a contingency.
+* **AccrualForEnvironmentalLossContingencies**: Use when the entity represents an accrual for environmental loss contingencies.
+* **OperatingLeasesRentExpenseNet**: Use when the entity represents rental expense relating to operating leases.
+* **InterestExpense**: Use when the entity represents interest expense related to debt instruments.
+* **LongTermDebtFairValue**: Use when the entity represents the fair value of long-term debt instruments, such as Senior Notes.
+* **IncomeTaxExpenseBenefit**: Use when the entity represents income tax expense or benefit for the period.
+
+## CODE SNIPPETS & TEMPLATES
+```python
+def map_to_us_gaap_tag(context, entity):
+    # Simplified example, actual implementation would involve more complex logic and rules
+    if "vesting period" in context:
+        return "ShareBasedCompensationArrangementByShareBasedPaymentAwardAwardVestingPeriod1"
+    elif "available for future share-based compensation grants" in context:
+        return "ShareBasedCompensationArrangementByShareBasedPaymentAwardNumberOfSharesAvailableForGrant"
+    elif "number of shares granted" in context or "shares of restricted Class A common stock" in context:
+        return "ShareBasedCompensationArrangementByShareBasedPaymentAwardEquityInstrumentsOtherThanOptionsGrantsInPeriod"
+    elif "goodwill" in context:
+        return "Goodwill"
+    elif "acquired" in context and "%" in context:
+        return "BusinessAcquisitionPercentageOfVotingInterestsAcquired"
+    elif "aggregate consideration paid for the acquisition" in context:
+        return "PaymentsToAcquireBusinessesGross"
+    elif "net cash consideration" in context:
+        return "PaymentsToAcquireBusinessesNetOfCashAcquired"
+    elif "developed technology intangible assets" in context:
+        return "BusinessCombinationRecognizedIdentifiableAssetsAcquiredAndLiabilitiesAssumedIntangibles"
+    elif "accrued" in context and "related to this matter" in context:
+        return "LossContingencyEstimateOfPossibleLoss"
+    elif "environmental liability" in context:
+        return "AccrualForEnvironmentalLossContingencies"
+    elif "Rental expense relating to operating leases" in context:
+        return "OperatingLeasesRentExpenseNet"
+    elif "Interest expense relating to notes payable" in context:
+        return "InterestExpense"
+    elif "fair value" in context and ("Senior Notes" in context or "long-term debt" in context):
+        return "LongTermDebtFairValue"
+    elif "zero tax provision" in context or "no income tax benefit" in context:
+        return "IncomeTaxExpenseBenefit"
+    # Add more conditions and rules as needed
+```
+
+## COMMON MISTAKES TO AVOID
+* Misinterpreting the context of the entity, leading to incorrect US GAAP tag selection.
+* Failing to distinguish between similar US GAAP tags, such as **PaymentsToAcquireBusinessesGross** and **PaymentsToAcquireBusinessesNetOfCashAcquired**.
+* Not considering the correct perspective for the tag.
+* Confusing "UnrecognizedTaxBenefits" with "IncomeTaxExpenseBenefit".
+* Misclassifying "fair value" of debt instruments as "InterestExpense".
+* Incorrectly tagging "number of shares granted" as **ShareBasedCompensationArrangementByShareBasedPaymentAwardNumberOfSharesAvailableForGrant** instead of **ShareBasedCompensationArrangementByShareBasedPaymentAwardEquityInstrumentsOtherThanOptionsGrantsInPeriod**.
+
+## AMBIGUOUS CASES & RESOLUTION
+* When the context is unclear or conflicting, re-examine the sentence and surrounding information to identify key phrases and keywords.
+* If multiple tags seem applicable, apply the most specific tag based on the context.
+* Be cautious of sentences that mention multiple financial concepts and ensure the correct tag is applied based on the specific entity and context.

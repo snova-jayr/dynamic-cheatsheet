@@ -1,0 +1,85 @@
+## FINANCIAL STRATEGIES & INSIGHTS
+
+### Understanding US GAAP Concepts and Contextual Analysis
+To accurately identify the correct US GAAP tag, it's crucial to understand the specific concept being referenced in the given context. Analyze the context of the sentence to determine the relevant US GAAP tag. For share-based compensation, distinguish between the number of shares available for grant, the weighted-average grant-date fair value of options granted, and the number of shares issued in a transaction. For interest expenses and income taxes, identify the relevant financial concept being referenced. Additionally, for business combinations and intangible assets, recognize the context of the transaction and the specific US GAAP tags related to the recognition of intangible assets and their useful lives. For long-term debt, recognize that Senior Notes are typically classified as long-term debt.
+
+### Identifying Relevant Concepts for Various Financial Metrics
+When a sentence mentions "interest expense," the relevant US GAAP tag is likely "InterestExpense." For sentences related to "income tax expense" or "income tax benefit," the tag "IncomeTaxExpenseBenefit" is applicable. For sentences related to "unrecognized tax benefits," the tag "UnrecognizedTaxBenefits" is applicable. For business combinations, identify the context of the transaction, such as the recognition of intangible assets and their useful lives. For long-term debt, identify the context of the transaction, such as the fair value of Senior Notes. For share-based compensation, identify the context of the transaction, such as the number of shares available for grant, the weighted-average grant-date fair value of stock options, and the vesting period.
+
+## FORMULAS & CALCULATIONS
+
+### Calculating Various Financial Metrics
+To calculate interest expense, identify the amount mentioned in the context. To calculate income tax expense or benefit, identify the amount mentioned in the context and consider the relevant tax rate. For business combinations, calculate the weighted-average useful life of acquired intangible assets. For long-term debt, calculate the fair value of Senior Notes. For share-based compensation, calculate the number of shares issued in a transaction and the vesting period.
+
+## CODE SNIPPETS & TEMPLATES
+
+### Python Code for Identifying US GAAP Tags
+```python
+def identify_us_gaap_tag(context, amount):
+    if "available for future share-based compensation grants" in context:
+        return "ShareBasedCompensationArrangementByShareBasedPaymentAwardNumberOfSharesAvailableForGrant"
+    elif "weighted-average grant-date fair value of stock options" in context or "weighted-average grant-date fair value of stock options and SARs" in context:
+        return "ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsGrantsInPeriodWeightedAverageGrantDateFairValue"
+    elif "number of shares issued" in context or "shares of restricted Class A common stock" in context:
+        return "ShareBasedCompensationArrangementByShareBasedPaymentAwardNumberOfSharesIssuedInTransaction"
+    elif "vesting period" in context or "years" in context:
+        return "ShareBasedCompensationArrangementByShareBasedPaymentAwardAwardVestingPeriod1"
+    elif "interest expense" in context:
+        return "InterestExpense"
+    elif "income tax expense" in context or "income tax benefit" in context or "tax provision" in context:
+        if "no" in context or "not recognized" in context:
+            return "UnrecognizedTaxBenefits"
+        else:
+            return "IncomeTaxExpenseBenefit"
+    elif "accrued liability" in context and "matter" in context:
+        return "LossContingencyAccrualAtCarryingValue"
+    elif "environmental liability" in context:
+        return "AccrualForEnvironmentalLossContingencies"
+    elif "rental expense" in context and "operating leases" in context:
+        return "OperatingLeasesRentExpenseNet"
+    elif "intangible assets" in context and "business combination" in context:
+        if "useful life" in context:
+            return "AcquiredFiniteLivedIntangibleAssetsWeightedAverageUsefulLife"
+        else:
+            return "BusinessCombinationRecognizedIdentifiableAssetsAcquiredAndLiabilitiesAssumedIntangibles"
+    elif "Senior Notes" in context and "fair value" in context:
+        return "LongTermDebtFairValue"
+    elif "goodwill" in context:
+        return "Goodwill"
+    elif "percentage of voting interests acquired" in context or "%" in context:
+        return "BusinessAcquisitionPercentageOfVotingInterestsAcquired"
+    elif "aggregate consideration paid" in context:
+        return "PaymentsToAcquireBusinessesGross"
+    elif "net cash consideration" in context:
+        return "PaymentsToAcquireBusinessesNetOfCashAcquired"
+    else:
+        return "Unknown"
+
+# Example usage:
+print(identify_us_gaap_tag("At year end 2016, approximately 27 million shares were available for future share-based compensation grants under the LTIP.", None))
+print(identify_us_gaap_tag("The weighted-average grant-date fair value of stock options and SARs granted during 2016, 2015 and 2014 was $14.40, $15.95 and $17.28, respectively.", None))
+print(identify_us_gaap_tag("Interest expense relating to notes payable to Squadron and Tawani was $ 608 and $ 761 for the three months ended September 30 , 2018 and 2017 , respectively , and $ 1,722 and $ 1,857 for the nine months ended September 30 , 2018 and 2017 , respectively .", "761"))
+print(identify_us_gaap_tag("For the three and nine month periods ended September 30 , 2018 and 2017 , we calculated the provision of income taxes by applying an estimate of the annual effective tax rate for the full fiscal year to the ordinary loss for the reporting period resulting in a zero tax provision consistent with prior periods .", "zero"))
+print(identify_us_gaap_tag("The deferred tax assets were fully offset by a valuation allowance at September 30 , 2018 and December 31 , 2017 , and no income tax benefit has been recognized in our condensed consolidated statements of operations for any of the periods presented .", "no"))
+print(identify_us_gaap_tag("In allocating the aggregate purchase price based on the estimated fair values , we recorded $ 9.9 million of developed technology intangible assets ( to be amortized over estimated useful lives of five years ) , $ 3.6 million of deferred tax liabilities and a total of $ 20.3 million of goodwill , of which $ 4.1 million is deductible for income tax purposes .", "9.9"))
+print(identify_us_gaap_tag("The weighted - average useful life for the patents acquired during the nine months ended September 30 , 2018 and 2017 was approximately eight years and ten years , respectively .", "eight"))
+print(identify_us_gaap_tag("The fair value of our Senior Notes due 2016 ( as defined below ) was $ 607 million as of December 31 , 2015 .", "607"))
+print(identify_us_gaap_tag("The fair value of our Senior Notes due 2021 ( as defined below ) was $ 651 million and $ 640 million as of December 31 , 2016 and 2015 , respectively .", "651"))
+print(identify_us_gaap_tag("The fair value of our Senior Notes due 2021 ( as defined below ) was $ 651 million and $ 640 million as of December 31 , 2016 and 2015 , respectively .", "640"))
+print(identify_us_gaap_tag("The fair value of our Senior Notes due 2023 ( as defined below ) was $ 555 million as of December 31 , 2016 .", "555"))
+print(identify_us_gaap_tag("We initially recognized goodwill of $ 483 million arising from the acquisition , which relates primarily to growth opportunities based on a broader service offering of the combined operations , including Wyle 's differentiated technical capabilities and KBR 's international program management and logistics expertise .", "483"))
+print(identify_us_gaap_tag("76 Chematur Subsidiaries Acquisition On January 11 , 2016 , we acquired 100 % of the outstanding common stock of three subsidiaries of Connell Chemical Industry LLC ( through its subsidiary , Chematur Technologies AB ) : Plinke GmbH ( \" Plinke \" ) , Weatherly Inc. , ( \" Weatherly \" ) and Chematur Ecoplanning Oy ( \" Ecoplanning \" ) .", "100"))
+print(identify_us_gaap_tag("The aggregate consideration paid for the acquisition was $ 25 million , less $ 2 million of acquired cash and other adjustments resulting in net cash consideration of $ 23 million .", "25"))
+print(identify_us_gaap_tag("The aggregate consideration paid for the acquisition was $ 25 million , less $ 2 million of acquired cash and other adjustments resulting in net cash consideration of $ 23 million .", "23"))
+print(identify_us_gaap_tag("Compensation expense for restricted stock subject to time - based vesting criteria granted to the director will be expensed 1/3 each year , for three years on an annual basis following such grant .", "three"))
+print(identify_us_gaap_tag("Compensation expense for restricted stock subject to time - based vesting criteria granted to the director will be expensed 1/3 each year , for three years on an annual basis following such grant .", "years"))
+print(identify_us_gaap_tag("2016 Annual Restricted Stock Awards and Annual Option Awards On February 18 , 2016 , Annual Restricted Stock Awards were granted to Management Grantees with an aggregate value of $ 9.1 million which represents 793,598 shares of restricted Class A common stock in connection with 2015 compensation .", "793,598"))
+print(identify_us_gaap_tag("2 . Compensation expense for restricted stock subject to time - based vesting criteria granted to the Management Grantees other than Mr. Harris , will be expensed 1/3 each year , for three years on an annual basis following such grant .", "three"))
+```
+
+## COMMON MISTAKES TO AVOID
+
+- Misidentifying the context of share-based compensation; ensure to distinguish between the number of shares available for grant, the weighted-average grant-date fair value of options granted, and the number of shares issued in a transaction.
+- Misidentifying the context of an accrued liability; ensure to distinguish between different types of liabilities.
+- Misidentifying interest expense and income tax expense/benefit; ensure to analyze the context carefully.
+- Misunderstanding the context of business combinations and intangible assets; ensure to recognize the specific US GAAP tags related to the recognition of intangible

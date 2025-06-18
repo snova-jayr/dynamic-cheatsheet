@@ -1,0 +1,123 @@
+## STEP-BY-STEP METHODOLOGY
+To determine the correct US GAAP tag for a given entity, follow these steps:
+1. **Read the sentence carefully**: Understand the context in which the entity is mentioned.
+2. **Identify key phrases and keywords**: Look for phrases that indicate the concept being described.
+3. **Match the context to a US GAAP concept**: Based on the keywords and phrases identified, determine the relevant US GAAP concept.
+4. **Select the most specific and relevant tag**: Choose the tag that most accurately represents the identified concept.
+
+## KEY PATTERNS & TRIGGERS
+### Share-Based Compensation
+- "stock options granted" -> ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsGrantsInPeriodGross
+- "number of shares available for grant" -> ShareBasedCompensationArrangementByShareBasedPaymentAwardNumberOfSharesAvailableForGrant
+- "vesting period" -> ShareBasedCompensationArrangementByShareBasedPaymentAwardAwardVestingPeriod1
+
+### Amortization Expense
+- "amortization expense" -> AmortizationOfIntangibleAssets
+
+### Income Tax Benefit/Expense
+- "income tax benefit" -> IncomeTaxExpenseBenefit
+- "income tax expense" -> IncomeTaxExpenseBenefit
+
+### Line of Credit
+- "amount available under the facility" -> LineOfCreditFacilityRemainingBorrowingCapacity
+- "revolving credit line" -> LineOfCreditFacilityRemainingBorrowingCapacity
+- "outstanding letters of credit" -> LettersOfCreditOutstandingAmount
+
+### Tax Rates
+- "effective tax rate" -> EffectiveIncomeTaxRateReconciliationAtFederalStatutoryIncomeTaxRate
+- "federal statutory income tax rate" -> EffectiveIncomeTaxRateReconciliationAtFederalStatutoryIncomeTaxRate
+
+### Unrecognized Tax Benefits
+- "unrecognized tax benefits that, if recognized, would affect the effective tax rate" -> UnrecognizedTaxBenefitsThatWouldImpactEffectiveTaxRate
+- "unrecognized tax benefits" -> UnrecognizedTaxBenefits
+
+### Defined Benefit Plan
+- "contributed to the pension plans" -> DefinedBenefitPlanContributionsByEmployer
+
+### Debt Instrument Basis Spread
+- "LIBOR plus" -> DebtInstrumentBasisSpreadOnVariableRate1
+
+### Restructuring Costs
+- "program charges" -> RestructuringAndRelatedCostExpectedCost1
+- "restructuring charges" -> RestructuringCharges
+- "capital expenditures" -> RestructuringAndRelatedCostExpectedCost1
+
+### Net Operating Loss Carryforwards
+- "net operating loss carryforwards" -> UnrecognizedTaxBenefitsThatWouldImpactEffectiveTaxRate (when related to unrecognized tax benefits)
+
+## TAG MAPPING RULES
+1. **ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsGrantsInPeriodGross**: Use when the entity represents the number of stock options granted during a period.
+2. **ShareBasedCompensationArrangementByShareBasedPaymentAwardNumberOfSharesAvailableForGrant**: Use when the entity represents the number of shares available for future grants.
+3. **ShareBasedCompensationArrangementByShareBasedPaymentAwardAwardVestingPeriod1**: Use when the entity represents the vesting period of stock options or awards.
+4. **AmortizationOfIntangibleAssets**: Use when the entity represents amortization expense related to intangible assets.
+5. **IncomeTaxExpenseBenefit**: Use when the entity represents income tax benefit or expense.
+6. **LineOfCreditFacilityRemainingBorrowingCapacity**: Use when the entity represents the amount available under a line of credit facility or revolving credit line.
+7. **LettersOfCreditOutstandingAmount**: Use when the entity represents the amount of outstanding letters of credit.
+8. **EffectiveIncomeTaxRateReconciliationAtFederalStatutoryIncomeTaxRate**: Use when the entity refers to the effective tax rate or federal statutory income tax rate.
+9. **UnrecognizedTaxBenefitsThatWouldImpactEffectiveTaxRate**: Use when the entity represents the amount of unrecognized tax benefits that would impact the effective tax rate if recognized.
+10. **UnrecognizedTaxBenefits**: Use when the entity represents unrecognized tax benefits.
+11. **DefinedBenefitPlanContributionsByEmployer**: Use when the entity represents the amount contributed to a defined benefit plan by the employer.
+12. **DebtInstrumentBasisSpreadOnVariableRate1**: Use when the entity represents a spread on a variable rate debt instrument, such as "LIBOR plus".
+13. **RestructuringAndRelatedCostExpectedCost1**: Use when the entity represents the expected cost of a restructuring program.
+14. **RestructuringCharges**: Use when the entity represents restructuring charges recorded in a period.
+
+## CODE SNIPPETS & TEMPLATES
+```python
+def map_to_us_gaap_tag(sentence, entity):
+    if "stock options granted" in sentence:
+        return "ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsGrantsInPeriodGross"
+    elif "number of shares available for grant" in sentence:
+        return "ShareBasedCompensationArrangementByShareBasedPaymentAwardNumberOfSharesAvailableForGrant"
+    elif "vesting period" in sentence or "years" in sentence:
+        return "ShareBasedCompensationArrangementByShareBasedPaymentAwardAwardVestingPeriod1"
+    elif "amortization expense" in sentence:
+        return "AmortizationOfIntangibleAssets"
+    elif "income tax benefit" in sentence or "income tax expense" in sentence:
+        return "IncomeTaxExpenseBenefit"
+    elif "amount available under the facility" in sentence or "revolving credit line" in sentence:
+        return "LineOfCreditFacilityRemainingBorrowingCapacity"
+    elif "outstanding letters of credit" in sentence:
+        return "LettersOfCreditOutstandingAmount"
+    elif "effective tax rate" in sentence or "federal statutory income tax rate" in sentence:
+        return "EffectiveIncomeTaxRateReconciliationAtFederalStatutoryIncomeTaxRate"
+    elif "unrecognized tax benefits that, if recognized, would affect the effective tax rate" in sentence:
+        return "UnrecognizedTaxBenefitsThatWouldImpactEffectiveTaxRate"
+    elif "unrecognized tax benefits" in sentence:
+        return "UnrecognizedTaxBenefits"
+    elif "contributed to the pension plans" in sentence:
+        return "DefinedBenefitPlanContributionsByEmployer"
+    elif "LIBOR plus" in sentence:
+        return "DebtInstrumentBasisSpreadOnVariableRate1"
+    elif "program charges" in sentence or "capital expenditures" in sentence:
+        return "RestructuringAndRelatedCostExpectedCost1"
+    elif "restructuring charges" in sentence:
+        return "RestructuringCharges"
+    elif "net operating loss carryforwards" in sentence:
+        return "UnrecognizedTaxBenefitsThatWouldImpactEffectiveTaxRate"
+    else:
+        return "Unknown"
+
+# Example usage
+sentences = [
+    "The Company granted 648,180 stock options under the 2016 Plan during the year ended December 31 , 2016 , consisting of 626,650 stock options vesting after four years and 21,530 stock options with various vesting schedules , but all of which vest within a calendar year of the respective grant date .",
+    "The 2016 Plan has reserved 6,000,000 shares for issuance of RSAs , RSUs or stock options , of which approximately 3.8 million awards were available for future grants as of December 31 , 2018 .",
+    "This change is primarily attributable to an increase in current year net operating loss carryforwards of $ 186.5 million and an increase of $ 417.0 million related to the early adoption of ASU 2016 - 09 ' Improvements to Employee Share - Based Payment Accounting , ' upon which previously unrecognized U.S. excess tax effects have been recorded as additional net operating loss carryforwards within our deferred tax asset .",
+    "A reconciliation of the beginning and ending balance of total unrecognized tax benefits is as follows ( in thousands ) : As of December 31 , 2016 , we had gross unrecognized tax benefits of approximately $ 18.4 million , of which $ 4.0 million would impact the effective tax rate , if recognized ."
+]
+entities = ["648,180", "6,000,000", "186.5", "18.4"]
+
+tags = [map_to_us_gaap_tag(sentence, entity) for sentence, entity in zip(sentences, entities)]
+print(tags)
+```
+
+## COMMON MISTAKES TO AVOID
+1. **Using a general tag when a specific one is available**: Ensure the most specific tag is used.
+2. **Failing to consider the context**: Always analyze the sentence to understand the concept being referenced.
+3. **Misinterpreting restructuring costs**: Be able to distinguish between different types of costs and expenditures.
+4. **Not distinguishing between share-based compensation tags**: Carefully distinguish between tags related to the number of shares authorized, granted, and available for grant.
+5. **Misclassifying unrecognized tax benefits**: Understand the distinction between total unrecognized tax benefits and those that would impact the effective tax rate.
+
+## AMBIGUOUS CASES & RESOLUTION
+1. **Unclear context**: Look for additional information to disambiguate.
+2. **Multiple possible tags**: Choose the most specific tag to the context provided.
+3. **Net operating loss carryforwards**: If related to unrecognized tax benefits, use "UnrecognizedTaxBenefitsThatWouldImpactEffectiveTaxRate".
