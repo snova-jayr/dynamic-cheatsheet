@@ -1,0 +1,130 @@
+## STEP-BY-STEP METHODOLOGY
+To determine the correct US GAAP tag for a given entity, follow these steps:
+1. **Read the sentence carefully**: Understand the context in which the entity is mentioned, paying attention to the surrounding phrases and keywords.
+2. **Identify key phrases and keywords**: Look for phrases that indicate the concept being described, such as financial obligations, guarantees, acquisitions, share-based compensation, or revenue from related parties.
+3. **Match the context to a US GAAP tag**: Use the identified keywords and phrases to determine the most specific and appropriate US GAAP tag. Consider the nuances of the context.
+4. **Disambiguate similar tags**: When multiple tags seem applicable, distinguish between them based on the specific details provided in the context.
+5. **Consider the financial statement context**: Understand whether the entity is related to income statements, balance sheets, or cash flow statements to apply the correct tag.
+
+## KEY PATTERNS & TRIGGERS
+* **Business Combinations & Acquisitions**:
+	+ "goodwill arising from the acquisition" -> BusinessCombinationRecognizedIdentifiableAssetsAcquiredAndLiabilitiesAssumedIntangibles
+	+ "acquired [percentage] % of the outstanding common stock" -> BusinessAcquisitionPercentageOfVotingInterestsAcquired
+	+ "aggregate consideration paid for the acquisition" -> PaymentsToAcquireBusinessesNetOfCashAcquired
+	+ "net cash consideration" -> PaymentsToAcquireBusinessesNetOfCashAcquired
+	+ "definite-lived intangible assets" -> BusinessCombinationRecognizedIdentifiableAssetsAcquiredAndLiabilitiesAssumedIntangibles
+	+ "developed technology intangible assets" -> BusinessCombinationRecognizedIdentifiableAssetsAcquiredAndLiabilitiesAssumedIntangibles
+	+ "useful lives of [number] years" -> BusinessCombinationRecognizedIdentifiableAssetsAcquiredAndLiabilitiesAssumedIntangibles
+* **Financial Obligations & Debt Instruments**:
+	+ "outstanding balance" and "Credit Agreement" -> DebtInstrumentFaceAmount
+	+ "aggregate principal amount" -> DebtInstrumentFaceAmount
+	+ "borrowings" and "promissory notes" -> DebtInstrumentCarryingAmount
+	+ "interest rates" and "range from" -> DebtInstrumentInterestRateStatedPercentage
+	+ "weighted average interest rate" -> DebtWeightedAverageInterestRate
+	+ "% senior notes" -> DebtInstrumentInterestRateStatedPercentage (for interest rates)
+	+ "million of [percentage] % senior notes" -> DebtInstrumentFaceAmount (for face amounts)
+	+ "Interest expense relating to notes payable" -> InterestExpense
+	+ "fair value of our Senior Notes" -> LongTermDebtFairValue
+* **Share-Based Compensation**:
+	+ "restricted common stock granted pursuant to the Plan" -> ShareBasedCompensationArrangementByShareBasedPaymentAwardEquityInstrumentsOtherThanOptionsGrantsInPeriod
+	+ "unrecognized compensation expense" -> EmployeeServiceShareBasedCompensationNonvestedAwardsTotalCompensationCostNotYetRecognizedShareBasedAwardsOtherThanOptions
+	+ "available for future share-based compensation grants" -> ShareBasedCompensationArrangementByShareBasedPaymentAwardNumberOfSharesAvailableForGrant
+	+ "weighted-average grant-date fair value of stock options and SARs" -> ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsGrantsInPeriodWeightedAverageGrantDateFairValue
+	+ "time-based vesting criteria" and "vesting period" -> ShareBasedCompensationArrangementByShareBasedPaymentAwardAwardVestingPeriod1
+	+ "Annual Restricted Stock Awards" and "shares of restricted Class A common stock" -> ShareBasedCompensationArrangementByShareBasedPaymentAwardEquityInstrumentsOtherThanOptionsGrantsInPeriodNumberOfShares
+* **Revenue from Related Parties**:
+	+ "revenue from sales of services to [related party]" -> RevenueFromRelatedParties
+* **Operating Leases & Sublease Income**:
+	+ "rent expense (net of sublease income)" -> OperatingLeasesRentExpenseNet
+	+ "rental expense relating to operating leases" -> OperatingLeasesRentExpenseNet
+* **Loss Contingencies & Accruals**:
+	+ "accrued $ [amount] related to this matter" -> LossContingencyAccrualAtCarryingValue
+	+ "environmental liability, measured on an undiscounted basis" -> AccrualForEnvironmentalLossContingencies
+	+ "civil penalties" -> LossContingencyAccrualAtCarryingValue
+	+ "contingent liability" -> AccrualForEnvironmentalLossContingencies (or a more specific contingency tag)
+* **Income Taxes**:
+	+ "zero tax provision" -> IncomeTaxExpenseBenefit
+	+ "no income tax benefit" -> IncomeTaxExpenseBenefit
+
+## TAG MAPPING RULES
+* **BusinessCombinationRecognizedIdentifiableAssetsAcquiredAndLiabilitiesAssumedIntangibles**: Use when the entity represents the value of intangible assets acquired in a business combination or their useful life.
+* **BusinessAcquisitionPercentageOfVotingInterestsAcquired**: Use when the entity represents the percentage of voting interests acquired in a business combination.
+* **PaymentsToAcquireBusinessesNetOfCashAcquired**: Use when the entity represents the total consideration paid to acquire a business, including adjustments for acquired cash.
+* **DebtInstrumentFaceAmount**: Use when the entity represents the face amount of a loan, debt instrument, or outstanding balance.
+* **LongTermDebtFairValue**: Use when the entity represents the fair value of long-term debt, such as Senior Notes.
+* **InterestExpense**: Use when the entity represents interest expenses related to notes payable or other debt instruments.
+* **ShareBasedCompensationArrangementByShareBasedPaymentAwardNumberOfSharesAvailableForGrant**: Use when the entity represents the number of shares available for future grants under a share-based compensation plan.
+* **ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsGrantsInPeriodWeightedAverageGrantDateFairValue**: Use when the entity represents the weighted-average grant-date fair value of stock options/SARs granted.
+* **ShareBasedCompensationArrangementByShareBasedPaymentAwardAwardVestingPeriod1**: Use when the entity represents the vesting period of share-based compensation awards.
+* **ShareBasedCompensationArrangementByShareBasedPaymentAwardEquityInstrumentsOtherThanOptionsGrantsInPeriodNumberOfShares**: Use when the entity represents the number of shares granted under a share-based compensation plan.
+* **LossContingencyAccrualAtCarryingValue**: Use when the entity represents an accrual for a loss contingency.
+* **AccrualForEnvironmentalLossContingencies**: Use when the entity represents an accrual for environmental loss contingencies.
+* **OperatingLeasesRentExpenseNet**: Use when the entity represents rental expense relating to operating leases.
+* **IncomeTaxExpenseBenefit**: Use when the entity represents income tax expense or benefit.
+
+## CODE SNIPPETS & TEMPLATES
+```python
+def map_to_us_gaap_tag(context, entity):
+    # Simplified example for demonstration purposes
+    if "goodwill arising from the acquisition" in context:
+        return "BusinessCombinationRecognizedIdentifiableAssetsAcquiredAndLiabilitiesAssumedIntangibles"
+    elif "acquired" in context and "%" in entity:
+        return "BusinessAcquisitionPercentageOfVotingInterestsAcquired"
+    elif "aggregate consideration paid for the acquisition" in context or "net cash consideration" in context:
+        return "PaymentsToAcquireBusinessesNetOfCashAcquired"
+    elif "definite-lived intangible assets" in context or "developed technology intangible assets" in context:
+        return "BusinessCombinationRecognizedIdentifiableAssetsAcquiredAndLiabilitiesAssumedIntangibles"
+    elif "available for future share-based compensation grants" in context:
+        return "ShareBasedCompensationArrangementByShareBasedPaymentAwardNumberOfSharesAvailableForGrant"
+    elif "weighted-average grant-date fair value of stock options and SARs" in context:
+        return "ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsGrantsInPeriodWeightedAverageGrantDateFairValue"
+    elif "time-based vesting criteria" in context and ("years" in entity or "three" in entity):
+        return "ShareBasedCompensationArrangementByShareBasedPaymentAwardAwardVestingPeriod1"
+    elif "Annual Restricted Stock Awards" in context and "shares of restricted" in context:
+        return "ShareBasedCompensationArrangementByShareBasedPaymentAwardEquityInstrumentsOtherThanOptionsGrantsInPeriodNumberOfShares"
+    elif "accrued" in context and "related to this matter" in context:
+        return "LossContingencyAccrualAtCarryingValue"
+    elif "environmental liability" in context:
+        return "AccrualForEnvironmentalLossContingencies"
+    elif "rental expense relating to operating leases" in context:
+        return "OperatingLeasesRentExpenseNet"
+    elif "Interest expense relating to notes payable" in context:
+        return "InterestExpense"
+    elif "fair value of our Senior Notes" in context:
+        return "LongTermDebtFairValue"
+    elif "zero tax provision" in context:
+        return "IncomeTaxExpenseBenefit"
+    elif "no income tax benefit" in context:
+        return "IncomeTaxExpenseBenefit"
+    elif "useful lives of" in context:
+        return "BusinessCombinationRecognizedIdentifiableAssetsAcquiredAndLiabilitiesAssumedIntangibles"
+    # Add more conditions as needed
+    else:
+        return "Unknown"
+
+# Example usage:
+context = "The $ 239.0 million value allocated to definite - lived intangible assets consists of $ 145.0 million of customer relationships."
+entity = "145.0"
+print(map_to_us_gaap_tag(context, entity))
+
+context = "At year end 2016 , approximately 27 million shares were available for future share - based compensation grants under the LTIP ."
+entity = "27"
+print(map_to_us_gaap_tag(context, entity))
+
+context = "The weighted - average grant - date fair value of stock options and SARs granted during 2016 , 2015 and 2014 was $ 14.40 , $ 15.95 and $ 17.28 , respectively ."
+entity = "14.40"
+print(map_to_us_gaap_tag(context, entity))
+
+context = "Compensation expense for restricted stock subject to time - based vesting criteria granted to the director will be expensed 1/3 each year , for three years on an annual basis following such grant ."
+entity = "three"
+print(map_to_us_gaap_tag(context, entity))
+
+context = "2016 Annual Restricted Stock Awards and Annual Option Awards On February 18 , 2016 , Annual Restricted Stock Awards were granted to Management Grantees with an aggregate value of $ 9.1 million which represents 793,598 shares of restricted Class A common stock in connection with 2015 compensation ."
+entity = "793,598"
+print(map_to_us_gaap_tag(context, entity))
+```
+
+## COMMON MISTAKES TO AVOID
+* Misinterpreting the context of the entity, leading to incorrect tag selection.
+* Failing to disambiguate between similar tags based on the specific details provided in the context.
+* Not considering the financial statement context when selecting ailing to consider the financial statement context when selecting a

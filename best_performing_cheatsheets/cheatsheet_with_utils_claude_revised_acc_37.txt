@@ -1,0 +1,117 @@
+## STEP-BY-STEP METHODOLOGY
+1. **Understand the Context**: Carefully read the sentence to grasp the financial concept being discussed, paying attention to specific transactions or events.
+2. **Identify Key Entities**: Determine the specific entity (e.g., percentage, amount, price per share) mentioned in the sentence.
+3. **Match Entity to Concept**: Relate the entity to the relevant financial concept based on the context.
+4. **Select Relevant Tag**: Choose the US GAAP tag that most accurately represents the identified concept.
+5. **Verify Contextual Clues**: Ensure contextual clues support the selected tag.
+6. **Apply Decision-Making Process**: Select the most appropriate tag based on context and entity type.
+
+## KEY PATTERNS & TRIGGERS
+- **Compensation Expense Context**: "compensation related to restricted common stock granted"
+  - Triggers: "AllocatedShareBasedCompensationExpense"
+- **Income Tax Expense/Benefit Context**: "income taxes", "provision for income taxes", "benefit from income taxes"
+  - Triggers: "IncomeTaxExpenseBenefit"
+- **Effective Tax Rate Reconciliation Context**: "statutory corporate tax rate"
+  - Triggers: "EffectiveIncomeTaxRateReconciliationAtFederalStatutoryIncomeTaxRate"
+- **Loss Contingency Context**: "damages sought", "accrued a contingent liability"
+  - Triggers: "LossContingencyDamagesSoughtValue", "LossContingencyAccrualAtCarryingValue", "AccrualForEnvironmentalLossContingencies"
+- **Revenue from Related Parties Context**: "revenue from sales of services to [related party]", "revenue from related parties"
+  - Triggers: "RevenueFromRelatedParties"
+- **Debt Instrument Context**: "senior notes", "tax-exempt financings", "interest rate", "face amount", "carrying amount"
+  - Triggers: "DebtInstrumentFaceAmount", "DebtInstrumentInterestRateStatedPercentage", "DebtInstrumentCarryingAmount"
+- **Debt Issuance Costs Context**: "debt issuance costs", "capitalized as debt issuance costs"
+  - Triggers: "DeferredFinanceCostsGross"
+- **Loss on Extinguishment of Debt Context**: "loss on extinguishment of debt", "unamortized debt issuance costs"
+  - Triggers: "GainsLossesOnExtinguishmentOfDebt"
+- **Line of Credit Facility Context**: "committed lines of credit", "credit facilities", "maximum borrowing capacity", "remaining borrowing capacity", "available unused credit"
+  - Triggers: "LineOfCreditFacilityMaximumBorrowingCapacity", "LineOfCreditFacilityRemainingBorrowingCapacity"
+- **Antidilutive Securities Context**: "anti-dilutive", "excludes [number] common stock equivalents"
+  - Triggers: "AntidilutiveSecuritiesExcludedFromComputationOfEarningsPerShareAmount"
+- **Restricted Stock Units Context**: "restricted stock units"
+  - Triggers: "NumberOfSharesExcludedFromComputationOfEarningsPerShare"
+
+## TAG MAPPING RULES
+- **Entities related to "compensation expense"**: Use "AllocatedShareBasedCompensationExpense".
+- **Entities related to "income tax expense/benefit"**: Use "IncomeTaxExpenseBenefit".
+- **Entities related to "effective tax rate reconciliation"**: Use "EffectiveIncomeTaxRateReconciliationAtFederalStatutoryIncomeTaxRate".
+- **Entities related to "loss contingency" or "damages sought"**: Use "LossContingencyDamagesSoughtValue" if representing damages sought; use "LossContingencyAccrualAtCarryingValue" or "AccrualForEnvironmentalLossContingencies" if representing an accrued liability.
+- **Entities related to "revenue from related parties"**: Use "RevenueFromRelatedParties".
+- **Entities related to "debt instruments"**:
+  - Use "DebtInstrumentFaceAmount" for the face amount or nominal value.
+  - Use "DebtInstrumentInterestRateStatedPercentage" for the stated interest rate of fixed-rate debt instruments.
+  - Use "DebtInstrumentCarryingAmount" for the carrying amount.
+- **Entities related to "debt issuance costs"**: Use "DeferredFinanceCostsGross".
+- **Entities related to "loss on extinguishment of debt"**: Use "GainsLossesOnExtinguishmentOfDebt".
+- **Entities related to "line of credit facilities"**:
+  - Use "LineOfCreditFacilityMaximumBorrowingCapacity" for the total or aggregate credit available.
+  - Use "LineOfCreditFacilityRemainingBorrowingCapacity" for the unused or available credit.
+- **Entities related to "antidilutive securities"**: Use "AntidilutiveSecuritiesExcludedFromComputationOfEarningsPerShareAmount".
+- **Entities related to "restricted stock units"**: Use "NumberOfSharesExcludedFromComputationOfEarningsPerShare".
+
+## CODE SNIPPETS & TEMPLATES
+```python
+def map_to_us_gaap_tag(context, entity):
+    context = context.lower()
+    if "compensation related to restricted common stock" in context:
+        return "AllocatedShareBasedCompensationExpense"
+    elif "income taxes" in context or "provision for income taxes" in context or "benefit from income taxes" in context:
+        return "IncomeTaxExpenseBenefit"
+    elif "statutory corporate tax rate" in context:
+        return "EffectiveIncomeTaxRateReconciliationAtFederalStatutoryIncomeTaxRate"
+    elif "effective tax rate" in context:
+        return "EffectiveIncomeTaxRateContinuingOperations"
+    elif "anti-dilutive" in context or "excludes" in context:
+        if "common stock equivalents" in context:
+            return "AntidilutiveSecuritiesExcludedFromComputationOfEarningsPerShareAmount"
+        elif "restricted stock units" in context:
+            return "NumberOfSharesExcludedFromComputationOfEarningsPerShare"
+    elif "loss contingency" in context and "accrued" in context:
+        return "LossContingencyAccrualAtCarryingValue"
+    elif "revenue from related parties" in context:
+        return "RevenueFromRelatedParties"
+    elif "debt issuance costs" in context:
+        return "DeferredFinanceCostsGross"
+    elif "loss on extinguishment of debt" in context or "unamortized debt issuance costs" in context:
+        return "GainsLossesOnExtinguishmentOfDebt"
+    elif "committed lines of credit" in context or "credit facilities" in context:
+        if "aggregate" in context or "total" in context:
+            return "LineOfCreditFacilityMaximumBorrowingCapacity"
+        elif "available unused credit" in context or "unused credit" in context:
+            return "LineOfCreditFacilityRemainingBorrowingCapacity"
+    elif "senior notes" in context or "tax-exempt financings" in context:
+        if "interest rate" in context or "%" in entity:
+            return "DebtInstrumentInterestRateStatedPercentage"
+        elif "face amount" in context or "aggregate principal amount" in context:
+            return "DebtInstrumentFaceAmount"
+        else:
+            return "DebtInstrumentCarryingAmount"
+    else:
+        return "Unknown"
+```
+
+## COMMON MISTAKES TO AVOID
+- Confusing "LossContingencyDamagesSoughtValue" with "LossContingencyAccrualAtCarryingValue" or "AccrualForEnvironmentalLossContingencies".
+- Misinterpreting revenue context.
+- Confusing "DebtInstrumentFaceAmount" with "DebtInstrumentCarryingAmount" or "DebtInstrumentInterestRateStatedPercentage".
+- Incorrectly applying "DebtInstrumentBasisSpreadOnVariableRate1" to fixed-rate debt instruments.
+- Failing to distinguish between "DeferredFinanceCostsGross" and other debt-related costs.
+- Misclassifying "LineOfCreditFacilityMaximumBorrowingCapacity" and "LineOfCreditFacilityRemainingBorrowingCapacity".
+- Not recognizing "EffectiveIncomeTaxRateContinuingOperations" for effective tax rates.
+- Not using "AntidilutiveSecuritiesExcludedFromComputationOfEarningsPerShareAmount" for antidilutive securities.
+- Not using "NumberOfSharesExcludedFromComputationOfEarningsPerShare" for restricted stock units.
+- Not recognizing "AllocatedShareBasedCompensationExpense" for compensation related to restricted common stock.
+- Not using "IncomeTaxExpenseBenefit" for income tax provisions and benefits.
+- Not using "EffectiveIncomeTaxRateReconciliationAtFederalStatutoryIncomeTaxRate" for statutory corporate tax rates.
+
+## AMBIGUOUS CASES & RESOLUTION
+- Use keywords like "accrued" or "damages sought" to disambiguate between "LossContingencyDamagesSoughtValue" and "LossContingencyAccrualAtCarryingValue".
+- For environmental-related accruals, use "AccrualForEnvironmentalLossContingencies".
+- For debt instruments, distinguish between face amount, interest rate, and carrying amount based on context.
+- For debt issuance costs, verify if the context mentions capitalization or amortization to apply "DeferredFinanceCostsGross".
+- For losses on extinguishment of debt, check for phrases like "loss on extinguishment" or "unamortized debt issuance costs".
+- For line of credit facilities, distinguish between maximum borrowing capacity and remaining borrowing capacity based on context.
+- For effective tax rates, use "EffectiveIncomeTaxRateContinuingOperations".
+- For antidilutive securities, use "AntidilutiveSecuritiesExcludedFromComputationOfEarningsPerShareAmount".
+- For restricted stock units, use "NumberOfSharesExcludedFromComputationOfEarningsPerShare".
+- For compensation related to restricted common stock, use "AllocatedShareBasedCompensationExpense".
+</chemesBasedCompensationExpense".
