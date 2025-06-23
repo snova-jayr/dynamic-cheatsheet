@@ -1,0 +1,69 @@
+## STEP-BY-STEP METHODOLOGY
+To determine the correct US GAAP tag for a given entity, follow these steps:
+1. **Read the sentence carefully**: Understand the context in which the entity is mentioned, paying attention to the surrounding phrases and keywords.
+2. **Identify key phrases and keywords**: Look for phrases that indicate the concept being described, such as financial obligations, guarantees, acquisitions, share-based compensation, or revenue from related parties.
+3. **Match the context to a US GAAP tag**: Use the identified keywords and phrases to determine the most specific and appropriate US GAAP tag. Consider the nuances of the context.
+4. **Disambiguate similar tags**: When multiple tags seem applicable, distinguish between them based on the specific details provided in the context.
+5. **Consider the financial statement context**: Understand whether the entity is related to income statements, balance sheets, or cash flow statements to apply the correct tag.
+6. **Prioritize specific context over general categorizations**: When the context explicitly mentions a specific concept (e.g., "exercise price of warrants"), prioritize that over more general categorizations (e.g., "SharePrice").
+
+## KEY PATTERNS & TRIGGERS
+* **Debt Instruments**:
+	+ "interest rate" or "%" following a number -> DebtInstrumentInterestRateStatedPercentage
+	+ "remaining balance" or "balance on the mortgage" or "aggregate borrowings" or "aggregate principal amount" or "outstanding principal amount" -> DebtInstrumentCarryingAmount
+	+ "stated loan amount" or "note payable" -> DebtInstrumentFaceAmount
+	+ "prepayment" -> RepaymentsOfDebt
+* **Equity Transactions**:
+	+ "price per common unit" -> SharePrice
+	+ "proceeds from issuance of common stock" or "aggregate proceeds" -> ProceedsFromIssuanceOfCommonStock
+	+ "exercise price of warrants" or "exercise price per share" -> ClassOfWarrantOrRightExercisePriceOfWarrantsOrRights1
+	+ "purchase price per share" -> SaleOfStockPricePerShare
+	+ "number of shares issued" -> SaleOfStockNumberOfSharesIssuedInTransaction
+* **Share-Based Compensation**:
+	+ "expire [number] years" or "expiration period" -> SharebasedCompensationArrangementBySharebasedPaymentAwardExpirationPeriod
+	+ "cumulative stock-based compensation expense" -> AllocatedShareBasedCompensationExpense
+* **Business Combinations & Goodwill**:
+	+ "purchase price allocation" and "intangible assets" -> BusinessCombinationRecognizedIdentifiableAssetsAcquiredAndLiabilitiesAssumedIntangibleAssetsOtherThanGoodwill
+	+ "purchase price allocation" and "goodwill" -> Goodwill
+* **Litigation & Contingencies**:
+	+ "pending litigation cases" or "cases remaining" or "litigation to date" -> LossContingencyPendingClaimsNumber
+
+## TAG MAPPING RULES
+* **ClassOfWarrantOrRightExercisePriceOfWarrantsOrRights1**: Use when the context mentions the exercise price of warrants or rights.
+* **SaleOfStockPricePerShare**: Use when the context mentions the purchase price per share in a stock sale transaction.
+* **SaleOfStockNumberOfSharesIssuedInTransaction**: Use when the context mentions the number of shares issued in a transaction.
+* **DebtInstrumentInterestRateStatedPercentage**: Use when the context mentions an interest rate, such as a percentage following a number.
+* **DebtInstrumentCarryingAmount**: Use when the context mentions the carrying amount of debt, such as "remaining balance", "balance on the mortgage", "aggregate borrowings", "aggregate principal amount", or "outstanding principal amount".
+* **ProceedsFromIssuanceOfCommonStock**: Use when the context mentions proceeds from the issuance of common stock or aggregate proceeds.
+
+## CODE SNIPPETS & TEMPLATES
+```python
+def map_to_us_gaap_tag(context, entity):
+    # Equity Transactions
+    if "exercise price of warrants" in context.lower() or "exercise price per share" in context.lower():
+        return "ClassOfWarrantOrRightExercisePriceOfWarrantsOrRights1"
+    elif "purchase price per share" in context.lower():
+        return "SaleOfStockPricePerShare"
+    elif "number of shares issued" in context.lower():
+        return "SaleOfStockNumberOfSharesIssuedInTransaction"
+    # Debt Instruments
+    elif "%" in entity and ("interest rate" in context.lower() or "Senior Notes" in context):
+        return "DebtInstrumentInterestRateStatedPercentage"
+    elif "outstanding principal amount" in context or "aggregate principal amount" in context:
+        return "DebtInstrumentCarryingAmount"
+    # Share-Based Compensation
+    elif "expire" in context and "years" in context:
+        return "SharebasedCompensationArrangementBySharebasedPaymentAwardExpirationPeriod"
+    elif "cumulative stock-based compensation expense" in context:
+        return "AllocatedShareBasedCompensationExpense"
+```
+
+## COMMON MISTAKES TO AVOID
+* Confusing **DebtInstrumentFaceAmount** with **DebtInstrumentCarryingAmount**: Ensure that the context clearly indicates whether the entity refers to the face amount or the carrying amount of a debt instrument.
+* Misinterpreting interest rates: Verify that the entity is indeed an interest rate and not another financial metric.
+* Using **SharePrice** for specific concepts like "exercise price of warrants" or "purchase price per share"; instead, use **ClassOfWarrantOrRightExercisePriceOfWarrantsOrRights1** or **SaleOfStockPricePerShare**, respectively.
+
+## AMBIGUOUS CASES & RESOLUTION
+* When the context is unclear or conflicting, prioritize the most specific and relevant information.
+* If multiple tags seem applicable, disambiguate based on the specific details provided in the context.
+* For entities related to share prices or transaction prices, distinguish between general concepts like "SharePrice" and more specific concepts like "ClassOfWarrantOrRightExercisePriceOfWarrantsOrRights1" and "SaleOfStockPricePerShare".

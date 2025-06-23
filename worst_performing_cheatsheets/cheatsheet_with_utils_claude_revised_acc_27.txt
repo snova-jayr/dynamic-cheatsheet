@@ -1,0 +1,63 @@
+## STEP-BY-STEP METHODOLOGY
+1. **Identify Context**: Determine the financial context in which the entity is mentioned, such as stock-based compensation, stock options, or warrants.
+2. **Analyze Entity**: Understand the type of entity (e.g., expense, number of shares, exercise price) and its relevance to the context.
+3. **Match to GAAP Tag**: Based on the context and entity type, match it to the most relevant US GAAP tag.
+4. **Disambiguate**: If multiple tags seem relevant, use contextual clues to disambiguate and prioritize the most specific tag.
+
+## KEY PATTERNS & TRIGGERS
+- **Stock-Based Compensation**: Expenses related to unvested stock options, restricted stock awards, and restricted stock units.
+  - Trigger words: "stock-based compensation expense", "unvested stock options", "restricted stock awards", "restricted stock units"
+  - Relevant tag: "ShareBasedCompensationArrangementByShareBasedPaymentAwardEquityInstrumentsOtherThanOptionsGrantsInPeriodWeightedAverageGrantDateFairValue"
+- **Stock Sales**: Number of shares sold in a public offering.
+  - Trigger words: "shares of common stock sold", "public offering"
+  - Relevant tag: "SaleOfStockNumberOfSharesIssuedInTransaction"
+- **Warrants**: Exercise price of warrants to purchase common stock.
+  - Trigger words: "warrants to purchase", "exercise price"
+  - Relevant tag: "ClassOfWarrantOrRightExercisePriceOfWarrantsOrRights1"
+- **Authorized Shares**: Number of common shares authorized.
+  - Trigger words: "authorized to issue", "common shares"
+  - Relevant tag: "CommonStockSharesAuthorized"
+
+## TAG MAPPING RULES
+- **Stock-based compensation expense**: Map to "ShareBasedCompensationArrangementByShareBasedPaymentAwardEquityInstrumentsOtherThanOptionsGrantsInPeriodWeightedAverageGrantDateFairValue".
+- **Number of shares sold in a public offering**: Map to "SaleOfStockNumberOfSharesIssuedInTransaction".
+- **Exercise price of warrants**: Map to "ClassOfWarrantOrRightExercisePriceOfWarrantsOrRights1".
+- **Number of common shares authorized**: Map to "CommonStockSharesAuthorized".
+
+## CODE SNIPPETS & TEMPLATES
+```python
+def map_to_gaap_tag(context, entity):
+    # Simplified example; actual implementation would involve more complex logic and possibly NLP techniques
+    if "stock-based compensation expense" in context and ("unvested stock options" in context or "restricted stock awards" in context or "restricted stock units" in context):
+        return "ShareBasedCompensationArrangementByShareBasedPaymentAwardEquityInstrumentsOtherThanOptionsGrantsInPeriodWeightedAverageGrantDateFairValue"
+    elif "shares of common stock sold" in context and "public offering" in context:
+        return "SaleOfStockNumberOfSharesIssuedInTransaction"
+    elif "warrants to purchase" in context and "exercise price" in context:
+        return "ClassOfWarrantOrRightExercisePriceOfWarrantsOrRights1"
+    elif "authorized to issue" in context and "common shares" in context:
+        return "CommonStockSharesAuthorized"
+    else:
+        return "Unknown"
+
+# Example usage:
+context1 = "Stock - based compensation expense of $ 4.3 million related to unvested stock options and $ 8.4 million related to unvested restricted stock awards and restricted stock units , each expected to be recognized over a weighted average period of approximately 2.3 years ."
+print(map_to_gaap_tag(context1, "8.4"))  # Output: ShareBasedCompensationArrangementByShareBasedPaymentAwardEquityInstrumentsOtherThanOptionsGrantsInPeriodWeightedAverageGrantDateFairValue
+
+context2 = "In the June 2018 follow - on public offering , the Company sold 2,090,909 shares of common stock ( inclusive of 272,727 shares of common stock sold by the Company pursuant to the full exercise of the underwriters ' option to purchase additional shares ) at a price to the public of $ 33.00 per share ."
+print(map_to_gaap_tag(context2, "2,090,909"))  # Output: SaleOfStockNumberOfSharesIssuedInTransaction
+
+context3 = "As of June 30 , 2018 , warrants to purchase 480,000 shares of the Company 's common stock at $ 10.00 per share remained outstanding ."
+print(map_to_gaap_tag(context3, "10.00"))  # Output: ClassOfWarrantOrRightExercisePriceOfWarrantsOrRights1
+
+context4 = "As of June 30 , 2018 , the Trust was authorized to issue up to 500,000,000 common shares of beneficial interest , par value $ 0.01 per share ( “ common shares ” ) ."
+print(map_to_gaap_tag(context4, "500,000,000"))  # Output: CommonStockSharesAuthorized
+```
+
+## COMMON MISTAKES TO AVOID
+- **Misinterpreting Context**: Ensure the context is correctly understood to apply the appropriate GAAP tag.
+- **Ignoring Trigger Words**: Pay attention to specific trigger words and phrases that indicate the relevant GAAP tag.
+- **Failing to Disambiguate**: If multiple tags seem applicable, prioritize the most specific tag based on the context.
+
+## AMBIGUOUS CASES & RESOLUTION
+- **Unclear Context**: If the context is unclear, look for additional information or clues within the sentence or surrounding text.
+- **Multiple Relevant Tags**: If multiple tags seem applicable, prioritize the most specific tag based on the context.

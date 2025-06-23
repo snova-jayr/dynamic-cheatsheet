@@ -1,0 +1,116 @@
+## STEP-BY-STEP METHODOLOGY
+1. **Understand the Context**: Carefully read the sentence to grasp the financial concept being discussed, paying attention to specific transactions or events.
+2. **Identify Key Entities**: Determine the specific entity (e.g., amount, expense, impairment charge) mentioned in the sentence.
+3. **Match Entity to Concept**: Relate the entity to the relevant financial concept based on the context.
+4. **Select Relevant Tag**: Choose the US GAAP tag that most accurately represents the identified concept.
+5. **Verify Contextual Clues**: Ensure contextual clues support the selected tag.
+6. **Apply Decision-Making Process**: Select the most appropriate tag based on context and entity type.
+7. **Distinguish Between Similar Concepts**: Be cautious of similar but distinct financial concepts.
+8. **Consider Nuances of US GAAP Tags**: Understand the specific application of US GAAP tags, especially for balance sheet accounts versus income statement accounts.
+
+## KEY PATTERNS & TRIGGERS
+- **Debt Instrument Context**: 
+  - "face amount", "notes payable", "principal amount" for face amount
+  - "carrying amount", "aggregate borrowings" for carrying amount
+  - "interest rate" for face amount or coupon rate
+  - Triggers: "DebtInstrumentFaceAmount", "DebtInstrumentCarryingAmount"
+- **Long-Term Debt Context**: 
+  - "long-term debt", "Senior Notes"
+  - Triggers: "LongTermDebtFairValue"
+- **Line of Credit Context**: 
+  - "Term Loan", "Incremental Term Loan", "Revolving Loan Facility", "borrowing limit", "credit facility"
+  - Triggers: "LineOfCredit", "LineOfCreditFacilityRemainingBorrowingCapacity", "LineOfCreditFacilityMaximumBorrowingCapacity"
+- **Share-Based Compensation Arrangements Context**: 
+  - "number of shares authorized", "shares authorized under the plan"
+  - "number of shares available for grant", "shares available under the plan"
+  - Triggers: "ShareBasedCompensationArrangementByShareBasedPaymentAwardNumberOfSharesAuthorized", "ShareBasedCompensationArrangementByShareBasedPaymentAwardNumberOfSharesAvailableForGrant"
+- **Common Stock Context**: 
+  - "common shares authorized", "par value"
+  - "shares reserved for future issuance"
+  - Triggers: "CommonStockSharesAuthorized", "CommonStockCapitalSharesReservedForFutureIssuance"
+- **Warrants and Rights Context**: 
+  - "exercise price", "warrants", "rights"
+  - Triggers: "ClassOfWarrantOrRightExercisePriceOfWarrantsOrRights1"
+- **Sale of Stock Context**: 
+  - "sale of shares", "number of shares issued", "purchase price per share"
+  - Triggers: "SaleOfStockNumberOfSharesIssuedInTransaction", "SaleOfStockPricePerShare"
+- **Extinguishment of Debt Context**: 
+  - "loss on extinguishment of debt", "early extinguishment of debt"
+  - Triggers: "GainsLossesOnExtinguishmentOfDebt"
+- **Business Combination Context**: 
+  - "purchase price allocation", "identifiable assets acquired", "goodwill"
+  - Triggers: "BusinessCombinationRecognizedIdentifiableAssetsAcquiredAndLiabilitiesAssumedIntangibles", "Goodwill"
+
+## TAG MAPPING RULES
+- **Entities related to "debt instruments with face amount" or "notes payable" or "interest rate"**: Use "DebtInstrumentFaceAmount".
+- **Entities related to "debt instruments with carrying amount"**: Use "DebtInstrumentCarryingAmount".
+- **Entities related to "long-term debt" or "Senior Notes" for fair value**: Use "LongTermDebtFairValue".
+- **Entities related to "Line of Credit" or "borrowing limit" or "credit facility"**: Use "LineOfCreditFacilityRemainingBorrowingCapacity" or "LineOfCreditFacilityMaximumBorrowingCapacity" based on context.
+- **Entities related to "common stock shares authorized"**: Use "CommonStockSharesAuthorized".
+- **Entities related to "common stock shares reserved for future issuance"**: Use "CommonStockCapitalSharesReservedForFutureIssuance".
+- **Entities related to "share-based compensation arrangements - number of shares authorized"**: Use "ShareBasedCompensationArrangementByShareBasedPaymentAwardNumberOfSharesAuthorized".
+- **Entities related to "share-based compensation arrangements - number of shares available for grant"**: Use "ShareBasedCompensationArrangementByShareBasedPaymentAwardNumberOfSharesAvailableForGrant".
+- **Entities related to "warrants or rights - exercise price"**: Use "ClassOfWarrantOrRightExercisePriceOfWarrantsOrRights1".
+- **Entities related to "sale of stock - number of shares issued"**: Use "SaleOfStockNumberOfSharesIssuedInTransaction".
+- **Entities related to "sale of stock - purchase price per share"**: Use "SaleOfStockPricePerShare".
+- **Entities related to "loss on extinguishment of debt"**: Use "GainsLossesOnExtinguishmentOfDebt".
+- **Entities related to "purchase price allocation - identifiable intangible assets"**: Use "BusinessCombinationRecognizedIdentifiableAssetsAcquiredAndLiabilitiesAssumedIntangibles".
+- **Entities related to "goodwill" in the context of business combinations or segment allocation**: Use "Goodwill".
+
+## CODE SNIPPETS & TEMPLATES
+```python
+def map_entity_to_tag(entity, context):
+    if "exercise price" in context and ("warrant" in context or "right" in context):
+        return "ClassOfWarrantOrRightExercisePriceOfWarrantsOrRights1"
+    elif "number of shares issued" in context and "sale of stock" in context:
+        return "SaleOfStockNumberOfSharesIssuedInTransaction"
+    elif "purchase price per share" in context and "sale of stock" in context:
+        return "SaleOfStockPricePerShare"
+    elif "impairment charge" in context and "goodwill" in context:
+        return "GoodwillImpairmentLoss"
+    elif "impairment charge" in context:
+        return "AssetImpairmentCharges"
+    elif "amortization expense" in context and "intangible assets" in context:
+        return "AmortizationOfIntangibleAssets"
+    elif "face amount" in context or "notes payable" in context or "principal amount" in context or "interest rate" in context:
+        return "DebtInstrumentFaceAmount"
+    elif "carrying amount" in context or "aggregate borrowings" in context:
+        return "DebtInstrumentCarryingAmount"
+    elif "long-term debt" in context or "Senior Notes" in context:
+        if "fair value" in context:
+            return "LongTermDebtFairValue"
+    elif "borrowing limit" in context or "Revolving Loan Facility" in context or "credit facility" in context:
+        if "maximum borrowing capacity" in context:
+            return "LineOfCreditFacilityMaximumBorrowingCapacity"
+        else:
+            return "LineOfCreditFacilityRemainingBorrowingCapacity"
+    elif "loss on extinguishment of debt" in context or "early extinguishment of debt" in context:
+        return "GainsLossesOnExtinguishmentOfDebt"
+    elif "purchase price allocation" in context:
+        if "intangible assets" in context:
+            return "BusinessCombinationRecognizedIdentifiableAssetsAcquiredAndLiabilitiesAssumedIntangibles"
+        elif "goodwill" in context:
+            return "Goodwill"
+    # Add more conditions as necessary
+```
+
+## COMMON MISTAKES TO AVOID
+- Confusing "face amount" with "carrying amount" for debt instruments.
+- Misinterpreting "borrowing limit" under a line of credit.
+- Failing to distinguish between "number of shares authorized" and "number of shares available for grant" in share-based compensation arrangements.
+- Not differentiating between impairment charges for different types of assets (e.g., goodwill vs. other assets).
+- Using "LossesOnExtinguishmentOfDebt" instead of "GainsLossesOnExtinguishmentOfDebt" for loss on extinguishment of debt.
+- Using "DebtInstrumentFaceAmount" or "DebtInstrumentFairValue" instead of "LongTermDebtFairValue" for fair value of long-term debt or Senior Notes.
+- Misclassifying "goodwill" and "identifiable intangible assets" in the context of business combinations.
+- Misinterpreting "interest rate" as not being related to "DebtInstrumentFaceAmount".
+- Incorrectly tagging "exercise price" of warrants or rights.
+- Incorrectly tagging "number of shares issued" and "purchase price per share" in the context of sale of stock.
+
+## AMBIGUOUS CASES & RESOLUTION
+- When context is unclear, look for additional clues such as surrounding sentences or financial statement line items.
+- For conflicting context, prioritize the most specific and relevant information.
+- Recognize that "Senior Notes" is a type of long-term debt and should be tagged similarly.
+- Understand that "goodwill" in the context of business combinations or segment allocation should be tagged as "Goodwill".
+- Consider "interest rate" as a trigger for "DebtInstrumentFaceAmount" in the context of debt instruments.
+- Be cautious when tagging "exercise price" of warrants or rights, ensuring it is tagged as "ClassOfWarrantOrRightExercisePriceOfWarrantsOrRights1".
+- Be cautious when tagging "number of shares issued" and "purchase price per share" in the context of sale of stock, ensuring they are tagged as "SaleOfStockNumberOfSharesIssuedInTransaction" and "SaleOfStockPricePerShare" respectively.

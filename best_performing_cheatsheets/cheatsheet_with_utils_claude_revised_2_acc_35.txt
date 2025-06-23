@@ -1,0 +1,102 @@
+## STEP-BY-STEP METHODOLOGY
+To determine the correct US GAAP tag for a given entity, follow these steps:
+1. **Read the sentence carefully**: Understand the context in which the entity is mentioned, paying attention to the surrounding phrases and keywords.
+2. **Identify key phrases and keywords**: Look for phrases that indicate the concept being described, such as financial obligations, guarantees, acquisitions, share-based compensation, or revenue from related parties.
+3. **Match the context to a US GAAP tag**: Use the identified keywords and phrases to determine the most specific and appropriate US GAAP tag. Consider the nuances of the context.
+4. **Disambiguate similar tags**: When multiple tags seem applicable, distinguish between them based on the specific details provided in the context.
+5. **Consider the financial statement context**: Understand whether the entity is related to income statements, balance sheets, or cash flow statements to apply the correct tag.
+
+## KEY PATTERNS & TRIGGERS
+* **Financial Obligations & Debt Instruments**:
+	+ "outstanding balance" and "Credit Agreement" -> DebtInstrumentFaceAmount
+	+ "aggregate principal amount" -> DebtInstrumentFaceAmount
+	+ "borrowings" and "promissory notes" -> DebtInstrumentCarryingAmount
+	+ "interest rates" and "range from" -> DebtInstrumentInterestRateStatedPercentage
+	+ "weighted average interest rate" -> DebtWeightedAverageInterestRate
+	+ "% senior notes" -> DebtInstrumentInterestRateStatedPercentage (for interest rates)
+	+ "million of [percentage] % senior notes" -> DebtInstrumentFaceAmount (for face amounts)
+	+ "remaining balance after payment" -> DebtInstrumentCarryingAmount
+	+ "proceeds from the offering" and "pay down" -> DebtInstrumentCarryingAmount
+* **Lines of Credit Facilities**:
+	+ "committed lines of credit" and "aggregate of approximately" -> LineOfCreditFacilityMaximumBorrowingCapacity
+	+ "available unused credit" -> LineOfCreditFacilityRemainingBorrowingCapacity
+	+ "credit facilities aggregating" -> LineOfCreditFacilityMaximumBorrowingCapacity
+* **Share-Based Compensation**:
+	+ "restricted common stock granted pursuant to the Plan" -> ShareBasedCompensationArrangementByShareBasedPaymentAwardEquityInstrumentsOtherThanOptionsGrantsInPeriod
+	+ "unrecognized compensation expense" -> EmployeeServiceShareBasedCompensationNonvestedAwardsTotalCompensationCostNotYetRecognizedShareBasedAwardsOtherThanOptions
+	+ "granted restricted share units" -> ShareBasedCompensationArrangementByShareBasedPaymentAwardEquityInstrumentsOtherThanOptionsGrantsInPeriod
+	+ "unvested restricted stock awards and restricted stock units" -> ShareBasedCompensationArrangementByShareBasedPaymentAwardEquityInstrumentsOtherThanOptionsNonvestedNumber
+* **Acquisitions & Interests**:
+	+ "acquisition of [entity]'s interest" -> BusinessAcquisitionPercentageOfVotingInterestsAcquired
+	+ "ownership percentage" and "equity method investment" -> EquityMethodInvestmentOwnershipPercentage
+	+ "acquire a [percentage] % interest" -> BusinessAcquisitionPercentageOfVotingInterestsAcquired
+* **Revenue from Related Parties**:
+	+ "revenue from sales of services to [related party]" -> RevenueFromRelatedParties
+* **Operating Leases & Sublease Income**:
+	+ "rent expense (net of sublease income)" -> OperatingLeasesRentExpenseNet
+	+ "Non Related party sublease totals" -> OperatingLeasesRentExpenseNet (or a more specific sublease income tag if available)
+* **Minority Interest & Ownership**:
+	+ "owned by [non-controlling entity]" -> MinorityInterestOwnershipPercentageByNoncontrollingOwners
+* **Loss Contingencies & Accruals**:
+	+ "civil penalties" -> LossContingencyAccrualAtCarryingValue
+	+ "punitive damages" -> LossContingencyAccrualAtCarryingValue
+	+ "contingent liability" -> AccrualForEnvironmentalLossContingencies (or a more specific contingency tag)
+	+ "accelerated recognition of unamortized debt issuance costs as a loss" -> GainsLossesOnExtinguishmentOfDebt
+* **Debt Issuance Costs**:
+	+ "costs incurred and capitalized as debt issuance costs" -> DeferredFinanceCostsGross
+* **Income Tax**:
+	+ "provision for income taxes" -> IncomeTaxExpenseBenefit
+	+ "benefit from income taxes" -> IncomeTaxExpenseBenefit
+	+ "effective tax rate" -> EffectiveIncomeTaxRateContinuingOperations
+	+ "permanent reduction in the U.S. statutory corporate tax rate" -> EffectiveIncomeTaxRateReconciliationAtFederalStatutoryIncomeTaxRate
+* **Anti-Dilutive Securities**:
+	+ "anti-dilutive securities" and "excluded from computation of earnings per share" -> AntidilutiveSecuritiesExcludedFromComputationOfEarningsPerShareAmount
+
+## TAG MAPPING RULES
+* **DebtInstrumentFaceAmount**: Use when the entity represents the face amount of a loan, debt instrument, or outstanding balance.
+* **DebtInstrumentCarryingAmount**: Use when the entity represents the carrying amount of a debt instrument, such as the remaining balance after a payment.
+* **DebtInstrumentInterestRateStatedPercentage**: Use when the entity represents the interest rate of a debt instrument.
+* **LineOfCreditFacilityMaximumBorrowingCapacity**: Use when the entity represents the maximum borrowing capacity of a line of credit facility.
+* **LineOfCreditFacilityRemainingBorrowingCapacity**: Use when the entity represents the remaining borrowing capacity of a line of credit facility.
+* **ShareBasedCompensationArrangementByShareBasedPaymentAwardEquityInstrumentsOtherThanOptionsGrantsInPeriod**: Use when the entity represents the number of shares granted, such as restricted common stock or restricted share units.
+* **EmployeeServiceShareBasedCompensationNonvestedAwardsTotalCompensationCostNotYetRecognizedShareBasedAwardsOtherThanOptions**: Use when the entity represents the unrecognized compensation expense or change in share-based compensation.
+* **BusinessAcquisitionPercentageOfVotingInterestsAcquired**: Use when the entity represents the percentage of voting interests acquired in a business acquisition.
+* **RevenueFromRelatedParties**: Use when the entity represents revenue from sales of services to related parties.
+* **OperatingLeasesRentExpenseNet**: Use when the entity represents rent expense net of sublease income or sublease income not related to related parties.
+* **MinorityInterestOwnershipPercentageByNoncontrollingOwners**: Use when the entity represents the ownership percentage of a non-controlling entity.
+* **LossContingencyAccrualAtCarryingValue**: Use when the entity represents a loss contingency accrual, such as civil penalties or punitive damages.
+* **AccrualForEnvironmentalLossContingencies**: Use when the entity represents a contingent liability for environmental costs.
+* **GainsLossesOnExtinguishmentOfDebt**: Use when the entity represents the loss on extinguishment of debt, such as the accelerated recognition of unamortized debt issuance costs.
+* **DeferredFinanceCostsGross**: Use when the entity represents the costs incurred and capitalized as debt issuance costs.
+* **IncomeTaxExpenseBenefit**: Use when the entity represents the income tax expense or benefit.
+* **EffectiveIncomeTaxRateContinuingOperations**: Use when the entity represents the effective tax rate for continuing operations.
+* **EffectiveIncomeTaxRateReconciliationAtFederalStatutoryIncomeTaxRate**: Use when the entity represents the reconciliation of the effective income tax rate at the federal statutory income tax rate.
+* **AntidilutiveSecuritiesExcludedFromComputationOfEarningsPerShareAmount**: Use when the entity represents anti-dilutive securities excluded from the computation of earnings per share.
+
+## CODE SNIPPETS & TEMPLATES
+```python
+def map_to_us_gaap_tag(entity, context):
+    # Implement the logic to map the entity to a US GAAP tag based on the context
+    if "restricted common stock granted pursuant to the Plan" in context:
+        return "ShareBasedCompensationArrangementByShareBasedPaymentAwardEquityInstrumentsOtherThanOptionsGrantsInPeriod"
+    elif "provision for income taxes" in context or "benefit from income taxes" in context:
+        return "IncomeTaxExpenseBenefit"
+    elif "permanent reduction in the U.S. statutory corporate tax rate" in context:
+        return "EffectiveIncomeTaxRateReconciliationAtFederalStatutoryIncomeTaxRate"
+    # Add more conditions and corresponding tags as needed
+    else:
+        return "Unknown"
+
+# Example usage:
+entity = "15.2"
+context = "During the year ended December 31 , 2016 , in connection with the restructuring activities , certain agreements were forfeited and re - granted with accelerated vesting terms , in accordance with ASC 718 , Compensation - Stock Compensation . The following table summarizes the activity related to restricted common stock for the year ended December 31 , 2018 and 2017 : 142 Table of Contents TWO HARBORS INVESTMENT CORP . Notes to the Consolidated Financial Statements For the years ended December 31 , 2018 , 2017 and 2016 , the Company recognized compensation related to restricted common stock granted pursuant to the Plan of $ 13.0 million , $ 11.3 million and $ 15.2 million , respectively ."
+print(map_to_us_gaap_tag(entity, context))
+```
+
+## COMMON MISTAKES TO AVOID
+* Misapplying tags related to income tax, such as confusing "IncomeTaxExpenseBenefit" with "EffectiveIncomeTaxRateContinuingOperations".
+* Failing to distinguish between different types of share-based compensation, such as "ShareBasedCompensationArrangementByShareBasedPaymentAwardEquityInstrumentsOtherThanOptionsGrantsInPeriod" and "EmployeeServiceShareBasedCompensationNonvestedAwardsTotalCompensationCostNotYetRecognizedShareBasedAwardsOtherThanOptions".
+
+## AMBIGUOUS CASES & RESOLUTION
+* When the context is unclear or conflicting, re-examine the surrounding phrases and keywords to determine the most appropriate US GAAP tag.
+* If multiple tags seem applicable, prioritize the most specific and relevant tag based on the context.
