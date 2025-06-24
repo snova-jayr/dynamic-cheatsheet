@@ -7,12 +7,13 @@ import re
 import time 
 from metrics import qa_score 
 
-from utils_reflection import *
+#from utils_reflection import *
+from utils_claude import * 
 
 
 #### API key information ####
 
-api_key = "6522ed42-dfa0-4f55-8231-5b6f9e2a9174"
+api_key = ""
 base_url = "https://api.sambanova.ai/v1"
 
 ###---------------------####
@@ -84,6 +85,17 @@ def initialize_client():
     client = openai.OpenAI(api_key=api_key, base_url=base_url)
     return client 
 
+def relaxed_check_xbrl(final_answer, gt_answer):
+    pred = final_answer.split(",")
+    label = gt_answer.split(",")
+    label = [val.lower().strip() for val in label]
+    count = 0 
+    for prediction in pred: 
+        prediction  = prediction.lower().strip()
+        if prediction in label: count += 1
+    score = count/len(pred)
+    if score > 0.5: return True 
+
 def relaxed_check(final_answer, gt_answer):
     score = qa_score(final_answer, gt_answer)
     if score > 0.4: return True 
@@ -98,6 +110,7 @@ def main():
         all_samples = list(json_file)
 
     if args.num_samples != -1: 
+        random.seed(42)
         random.shuffle(all_samples)
         all_samples = all_samples[:args.num_samples]
 
@@ -111,12 +124,19 @@ def main():
         task_dict = ast.literal_eval(sample)
         reflection = "(empty)"
         all_context  = task_dict["context"]
-        question, context = all_context.split("\nDocument Pages Context")
+
+        # FinanceBench 
+        #question, context = all_context.split("\nDocument Pages Context")
+
+        # XBRL finer 
+        index = all_context.index("Answer the following 4 independent questions by providing only")
+        context, question = all_context[:index], all_context[index:]
+
         gt_answer = task_dict["target"]
    
         # get answer from generator 
-        gen_prompt = generator_prompt.format(old_cheatsheet, reflection, context, question)
-
+        gen_prompt = generator_prompt.format(old_cheatsheet, reflection, question, context)
+        
         response = client.chat.completions.create(
                     model=args.generator_model,
                     messages=[{"role": "user", "content": gen_prompt}],
@@ -125,11 +145,12 @@ def main():
 
         gen_response = response.choices[0].message.content
         final_answer = extract_answer(gen_response)
-    
-        if not relaxed_check(final_answer, gt_answer): 
+        if not relaxed_check_xbrl(final_answer, gt_answer): 
             for i in range(args.max_num_rounds):
                 # reflect 
-                reflection_prompt = reflector_prompt.format(gen_response, question, context, final_answer, gt_answer)
+                #reflection_prompt = reflector_prompt.format(question, gen_response, final_answer, gt_answer)
+                reflection_prompt = reflector_prompt.format(question, gen_response, final_answer, gt_answer, old_cheatsheet)
+            
                 response = client.chat.completions.create(
                             model=args.reflector_model,
                             messages=[{"role": "user", "content": reflection_prompt}],
@@ -137,8 +158,9 @@ def main():
                 )
                 reflection = response.choices[0].message.content
              
-                # generate after relfection 
-                gen_prompt = generator_prompt.format(old_cheatsheet, reflection, context, question)
+                # generate after reflection 
+                gen_prompt = generator_prompt.format(old_cheatsheet, reflection, question, context)
+            
                 response = client.chat.completions.create(
                             model=args.generator_model,
                             messages=[{"role": "user", "content": gen_prompt}],
@@ -146,10 +168,11 @@ def main():
                 )
                 gen_response = response.choices[0].message.content
                 final_answer = extract_answer(gen_response)
-                if relaxed_check(final_answer, gt_answer): break 
+                if relaxed_check_xbrl(final_answer, gt_answer): break 
 
         # generate cheatsheet
-        cur_prompt = curator_prompt.format(reflection, old_cheatsheet, question, gen_response)
+        #cur_prompt = curator_prompt.format(reflection, old_cheatsheet, question, context, gen_response) # final answer instead of gen_response 
+        cur_prompt = curator_prompt.format(old_cheatsheet, reflection, question, gen_response)
     
         response = client.chat.completions.create(
                     model=args.curator_model,
@@ -159,9 +182,9 @@ def main():
         response = response.choices[0].message.content
         new_cheatsheet = extract_cheatsheet(response, old_cheatsheet)
         old_cheatsheet = new_cheatsheet
-
-        # save generated cheatsheet
-        open(f"{args.save_path}/trial_question_{question_counts}.txt", "w+").write(new_cheatsheet)
+        if question_counts % 10 == 0:
+            # save generated cheatsheet
+            open(f"{args.save_path}/trial_question_{question_counts}.txt", "w+").write(new_cheatsheet)
         question_counts += 1
 
 if __name__=="__main__":

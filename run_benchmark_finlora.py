@@ -4,19 +4,27 @@ import os
 import pandas as pd
 import numpy as np
 import argparse
+import re 
 import time 
 import torch 
 from tqdm import tqdm
 import sklearn
 import evaluate
+import openai 
 
 from datasets import load_dataset, load_from_disk
 from dynamic_cheatsheet.language_model import LanguageModel
 from dynamic_cheatsheet.utils.evaluation import eval_for_GameOf24, eval_for_multiple_choice, eval_for_exact_matching_with_no_punctuation, eval_equation_balancer
 
 from dotenv import load_dotenv
+from utils_claude_revised import * 
 
+#### API key information ####
 
+api_key = ""
+base_url = "https://api.sambanova.ai/v1"
+
+###---------------------####
 
 DATA_DIR = "/import/ml-sc-scratch2/shubhangiu/jays_dc_repo/dynamic-cheatsheet/data/finlora/test/" 
 
@@ -127,6 +135,34 @@ def write_jsonl(file_path, data):
             file.write(json.dumps(line) + "\n")
 
 
+def initialize_client():
+    client = openai.OpenAI(api_key=api_key, base_url=base_url)
+    return client
+
+
+def extract_answer(
+    response: str,
+) -> str:
+    """
+    Extracts the final answer from the model response.
+
+    Arguments:
+        response : str : The response from the model.
+
+    Returns:
+        str : The extracted final answer (if not found, returns "No final answer found").
+    """
+
+
+    matches = re.findall(r"Finish\[(.*?)\]", response)
+
+    if matches:
+        last_answer = matches[-1]
+        return last_answer
+    else:
+        return "No final answer found"
+
+
 def evaluate_accuracy(out, target, target_type_list):
     correct_count = 0
     response = []
@@ -185,6 +221,31 @@ def evaluate_accuracy(out, target, target_type_list):
 
     return accuracy, response
 
+def process_batched(out_text_list, target_list):
+    processed_out_text_list = []
+    processed_target_list = []
+
+    for out_text, target in zip(out_text_list, target_list):
+        split_output = [x.strip().replace("\n", "") for x in out_text.split(',')]  # Split and strip whitespace
+        split_target = [x.strip().replace("\n", "") for x in target.split(',')]  # Split and strip whitespace
+        processed_target_list += (split_target)  # Keep the split target
+        output_len = len(split_output)
+        target_len = len(split_target)
+
+        if output_len != target_len:
+            if output_len > target_len:
+                # Output is longer, truncate
+                processed_out_text_list += (split_output[:target_len])
+            else:
+                # Target is longer, pad output with empty strings
+                padding_needed = target_len - output_len
+                processed_out_text_list += (split_output + [""] * padding_needed)
+        else:
+            # Lengths match, use output as is
+            processed_out_text_list += (split_output)
+    assert len(processed_out_text_list) == len(processed_target_list)
+    return processed_out_text_list, processed_target_list
+
 
 def test_fin_tasks(args, data_name="xbrl_finer", prompt_fun=None):
     start_time = time.time()
@@ -210,12 +271,17 @@ def test_fin_tasks(args, data_name="xbrl_finer", prompt_fun=None):
         args.cheatsheet_prompt = "(empty)"
 
     # Initialize the language model
-    model = LanguageModel(
-        model_name=args.model_name,
-    )
+    if args.approach_name == "test_with_global_cheatsheet":
+        model = initialize_client()
+    else:
+        model = LanguageModel(
+            model_name=args.model_name,
+        )
 
     # Initialize the cheatsheet
     cheatsheet = "(empty)"
+    reflection = "(empty)"
+
     if args.cheatsheet_prompt_path is not None:
         with open(args.cheatsheet_prompt_path, "r") as file:
             cheatsheet = file.read()
@@ -239,6 +305,7 @@ def test_fin_tasks(args, data_name="xbrl_finer", prompt_fun=None):
     # Initialize the questions and the embeddings
     questions = None
     embeddings = None
+
     '''
     if args.approach_name in ["Dynamic_Retrieval", "DynamicCheatsheet_RetrievalSynthesis", "FullHistoryAppending"]:
         df = pd.read_csv(f"embeddings/{args.task}.csv")
@@ -269,7 +336,8 @@ def test_fin_tasks(args, data_name="xbrl_finer", prompt_fun=None):
     generator_outputs_so_far = []
 
     task_pbar = tqdm(range(total_steps))
-
+    #cheatsheet = "(empty)"
+    count = 0 
     for i in task_pbar:
         tmp_context = context[i]
 
@@ -279,23 +347,48 @@ def test_fin_tasks(args, data_name="xbrl_finer", prompt_fun=None):
         tmp_target = instructions['target'].tolist()[i]
         
         time.sleep(10)
+    
+        if args.approach_name == "test_with_global_cheatsheet":
+            # XBRL finer 
+            index = tmp_context.index("Answer the following 4 independent questions by providing only")
+            question_context, question = tmp_context[:index], tmp_context[index:]
+            gen_prompt = generator_prompt.format(cheatsheet, reflection, question, question_context)
+            #gen_prompt = tmp_context
 
-        output_dict = model.advanced_generate(
-            approach_name=args.approach_name,
-            input_txt=tmp_context,
-            cheatsheet=cheatsheet,
-            generator_template=args.generator_prompt,
-            cheatsheet_template=args.cheatsheet_prompt,
-            temperature=args.temperature,
-            max_tokens=args.max_tokens,
-            max_num_rounds=args.max_num_rounds,
-            allow_code_execution=args.execute_python_code,
-            code_execution_flag="EXECUTE CODE!",
-            #original_input_corpus=questions[:i+1],
-            #original_input_embeddings=embeddings[:i+1] if args.approach_name in ["Dynamic_Retrieval", "DynamicCheatsheet_RetrievalSynthesis", "FullHistoryAppending"] else None,
-            generator_outputs_so_far=generator_outputs_so_far,
-            retrieve_top_k=args.retrieve_top_k,
-        )
+            response = model.chat.completions.create(
+                    model=args.model_name,
+                    messages=[{"role": "user", "content": gen_prompt}],
+                    temperature=0.0
+            )
+            try:
+                gen_response = response.choices[0].message.content
+                count += 1
+            except: 
+                continue 
+        
+            #final_answer = gen_response 
+            final_answer = extract_answer(gen_response)
+            output_dict = {}
+            output_dict["final_output"] = gen_response 
+            output_dict["final_answer"] = final_answer
+            output_dict["final_cheatsheet"] = cheatsheet
+        else:
+            output_dict = model.advanced_generate(
+                approach_name=args.approach_name,
+                input_txt=tmp_context,
+                cheatsheet=cheatsheet,
+                generator_template=args.generator_prompt,
+                cheatsheet_template=args.cheatsheet_prompt,
+                temperature=args.temperature,
+                max_tokens=args.max_tokens,
+                max_num_rounds=args.max_num_rounds,
+                allow_code_execution=args.execute_python_code,
+                code_execution_flag="EXECUTE CODE!",
+                #original_input_corpus=questions[:i+1],
+                #original_input_embeddings=embeddings[:i+1] if args.approach_name in ["Dynamic_Retrieval", "DynamicCheatsheet_RetrievalSynthesis", "FullHistoryAppending"] else None,
+                generator_outputs_so_far=generator_outputs_so_far,
+                retrieve_top_k=args.retrieve_top_k,
+            )
 
         generator_outputs_so_far.append(output_dict["final_output"])
 
@@ -357,7 +450,7 @@ def test_fin_tasks(args, data_name="xbrl_finer", prompt_fun=None):
             f1 = -1
             print(f"Error calculating F1 score for {data_name}")
         print(
-            f"\n✓ {data_name}: Accuracy: {acc * 100:.3f}%, F1: {f1:.3f}, Time per question: {per_question_time:.2f} s")
+                f"\n✓ {data_name}: Accuracy: {acc * 100:.3f}%, F1: {f1:.3f}, Time per question: {per_question_time:.2f} s, total count: {count}")
         
         final_results['acc'] = acc
         final_results['f1'] = f1
