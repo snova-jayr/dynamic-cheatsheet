@@ -10,6 +10,7 @@ from functools import partial
 from transformers import AutoModelForCausalLM, AutoTokenizer
 litellm.drop_params=True
 
+
 class LanguageModel:
     def __init__(self,
         model_name: str,
@@ -213,7 +214,7 @@ class LanguageModel:
             generator_history = [
                 {"role": "user", "content": generator_prompt},
             ]
-            
+        
             generator_output = self.generate(
                 history=generator_history,
                 temperature=temperature,
@@ -247,6 +248,7 @@ class LanguageModel:
             steps = []
             previous_answers = []
 
+            cheatsheet = "(empty)"
             generator_output = ''
 
             for round in range(max(1, max_num_rounds)):
@@ -280,18 +282,17 @@ class LanguageModel:
                 cheatsheet_prompt = cheatsheet_template.replace("[[QUESTION]]", input_txt).replace("[[MODEL_ANSWER]]", generator_output).replace("[[PREVIOUS_CHEATSHEET]]", current_cheatsheet)
 
                 cheatsheet_history = [{"role": "user", "content": cheatsheet_prompt}]
-                
                 cheatsheet_output = self.generate(
                     history=cheatsheet_history,
                     temperature=temperature,
                     max_tokens=max_tokens,
                     allow_code_execution=False,
                 )
-            
+                
                 # Extract the new cheatsheet from the output (if present); otherwise, return the old cheatsheet
                 new_cheatsheet = extract_cheatsheet(response=cheatsheet_output, old_cheatsheet=current_cheatsheet)
                 cheatsheet = new_cheatsheet
-                
+
                 previous_answers.append(f"Round {round+1}: {generator_answer}")
                 
                 steps.append({
