@@ -354,7 +354,7 @@ def test_fin_tasks(args, data_name="xbrl_finer", prompt_fun=None):
             question_context, question = tmp_context[:index], tmp_context[index:]
             gen_prompt = generator_prompt.format(cheatsheet, reflection, question, question_context)
             #gen_prompt = tmp_context
-
+            
             response = model.chat.completions.create(
                     model=args.model_name,
                     messages=[{"role": "user", "content": gen_prompt}],
