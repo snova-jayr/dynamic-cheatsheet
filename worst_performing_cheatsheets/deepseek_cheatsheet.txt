@@ -1,0 +1,94 @@
+## FINANCIAL STRATEGIES & INSIGHTS
+- **Pension Accounting**:  
+  - Use `DefinedContributionPlanCostRecognized` for costs of defined contribution plans (recognized immediately).  
+  - Use `DefinedBenefitPlanContributionsByEmployer` for employer contributions to defined benefit plans.  
+- **Tax Assets**: Apply `OperatingLossCarryforwards` for net operating loss carryforwards (deferred tax assets under ASC 740).  
+- **Share-Based Compensation**:  
+  - **Recognition Timing**:  
+    - Recognized expenses → `AllocatedShareBasedCompensationExpense`  
+    - *Unrecognized costs* (e.g., "expected to be recognized over...") → `EmployeeServiceShareBasedCompensationNonvestedAwardsTotalCompensationCostNotYetRecognized`  
+- **Equity Transactions**:  
+  - New shares issued during a period → `StockIssuedDuringPeriodSharesNewIssues`  
+  - Cumulative shares issued → `CommonStockSharesIssued`  
+  - Authorized shares → `CommonStockSharesAuthorized`  
+- **Warrants/Rights**:  
+  - Exercise price → `ClassOfWarrantOrRightExercisePriceOfWarrantsOrRights1`  
+
+## FORMULAS & CALCULATIONS
+*(No changes; maintain prior formulas)*
+
+## CODE SNIPPETS & TEMPLATES
+```python
+# Enhanced SBC & Equity Tag Selector
+def select_sbc_equity_tag(description: str, value: float) -> str:
+    """
+    Returns US GAAP tag for SBC or equity transactions.
+    
+    Args:
+        description: Text surrounding the value
+        value: Numeric value (unused in some cases)
+        
+    Returns:
+        Appropriate US GAAP tag string
+    """
+    description = description.lower()
+    
+    # SBC Recognition Timing
+    if "expected to be recognized" in description or "not yet recognized" in description:
+        return "EmployeeServiceShareBasedCompensationNonvestedAwardsTotalCompensationCostNotYetRecognized"
+    elif "compensation expense" in description:
+        return "AllocatedShareBasedCompensationExpense"
+    
+    # Equity Issuance Context
+    if "sold in" in description or "issued during" in description:
+        return "StockIssuedDuringPeriodSharesNewIssues"
+    elif "authorized" in description and "shares" in description:
+        return "CommonStockSharesAuthorized"
+    elif "shares issued" in description:
+        return "CommonStockSharesIssued"
+    
+    # Warrants/Rights
+    if "warrant" in description and ("exercise price" in description or "per share" in description):
+        return "ClassOfWarrantOrRightExercisePriceOfWarrantsOrRights1"
+    
+    # Fallback to pension/tax function if no match
+    return select_pension_tax_tag(description)
+
+# Example usage for unrecognized SBC cost:
+# select_sbc_equity_tag("$8.4 million expected to be recognized over 2.3 years", 8.4)
+```
+
+## COMMON MISTAKES TO AVOID
+- **Pension plan confusion**:  
+  - Using SBC tags for pension costs → **Use plan-specific tags**  
+- **SBC recognition timing**:  
+  - Tagging unrecognized costs (`expected to be recognized...`) as expenses → **Use `EmployeeService...NotYetRecognized`**  
+- **Equity issuance context**:  
+  - Tagging new period-specific issuances (`sold in [offering]`) as `CommonStockSharesIssued` → **Use `StockIssuedDuringPeriodSharesNewIssues`**  
+- **Ignoring key phrases**: Overlooking temporal clues ("during", "in [period]") or recognition timelines ("expected to be recognized").  
+
+## PROBLEM-SOLVING HEURISTICS
+1. **SBC Recognition Triage**:  
+   - "Recognized" / "expense" → `AllocatedShareBasedCompensationExpense`  
+   - "Expected to be recognized" / "not yet recognized" → `EmployeeService...NotYetRecognized`  
+2. **Equity Transaction Flow**:  
+   - "Authorized" → `CommonStockSharesAuthorized`  
+   - "Issued during [period]" / "sold in [offering]" → `StockIssuedDuringPeriodSharesNewIssues`  
+   - Cumulative total without timeframe → `CommonStockSharesIssued`  
+3. **Warrant/Rights Pricing**:  
+   - "Exercise price" + warrant context → `ClassOfWarrantOrRightExercisePriceOfWarrantsOrRights1`  
+4. **Tax/Loss Contingency Check**:  
+   - Future tax benefit → `OperatingLossCarryforwards`  
+   - Potential liability → `LossContingencyEstimateOfPossibleLoss`  
+
+## CONTEXT CLUES & INDICATORS
+- **Unrecognized SBC signals**:  
+  - "Expected to be recognized over...", "not yet recognized", "unvested awards"  
+- **New equity issuance signals**:  
+  - "Sold in [date/offering]", "issued during [period]", "follow-on offering"  
+- **Warrant exercise price signals**:  
+  - "At $[X] per share", "exercise price", "warrants to purchase"  
+- **Tax asset vs. loss contingency**:  
+  - Carryforwards → "net operating loss", "future tax benefit"  
+  - Contingencies → "reasonably possible loss", "pending litigation"  
+- **Critical exclusion**: Never use temporal equity tags (`StockIssuedDuringPeriod...`) for cumulative totals.
