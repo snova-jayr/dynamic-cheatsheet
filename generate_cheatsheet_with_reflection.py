@@ -7,8 +7,7 @@ import re
 import time 
 from metrics import qa_score 
 
-#from utils_reflection import *
-from utils_claude import * 
+from utils_claude import *
 
 
 #### API key information ####
@@ -17,7 +16,6 @@ api_key = ""
 base_url = "https://api.sambanova.ai/v1"
 
 ###---------------------####
-
 
 
 def extract_cheatsheet(
@@ -44,7 +42,6 @@ def extract_cheatsheet(
             return old_cheatsheet
     else:
         return old_cheatsheet
-
 
 def extract_answer(
     response: str,
@@ -82,6 +79,7 @@ def parse_args():
     return args 
 
 def initialize_client():
+    # SAMBANOVA client 
     client = openai.OpenAI(api_key=api_key, base_url=base_url)
     return client 
 
@@ -97,10 +95,10 @@ def relaxed_check_xbrl(final_answer, gt_answer):
     if score > 0.5: return True 
 
 def relaxed_check(final_answer, gt_answer):
+    # used for financebench 
     score = qa_score(final_answer, gt_answer)
     if score > 0.4: return True 
     return False 
-    #return (final_answer.lower() in gt_answer.lower() or gt_answer.lower() in final_answer.lower())
 
 def main():
     args = parse_args()
@@ -145,11 +143,11 @@ def main():
 
         gen_response = response.choices[0].message.content
         final_answer = extract_answer(gen_response)
+
         if not relaxed_check_xbrl(final_answer, gt_answer): 
             for i in range(args.max_num_rounds):
                 # reflect 
-                #reflection_prompt = reflector_prompt.format(question, gen_response, final_answer, gt_answer)
-                reflection_prompt = reflector_prompt.format(question, gen_response, final_answer, gt_answer, old_cheatsheet)
+                reflection_prompt = reflector_prompt.format(question, gen_response, final_answer, gt_answer)
             
                 response = client.chat.completions.create(
                             model=args.reflector_model,
@@ -171,9 +169,7 @@ def main():
                 if relaxed_check_xbrl(final_answer, gt_answer): break 
 
         # generate cheatsheet
-        #cur_prompt = curator_prompt.format(reflection, old_cheatsheet, question, context, gen_response) # final answer instead of gen_response 
         cur_prompt = curator_prompt.format(old_cheatsheet, reflection, question, gen_response)
-    
         response = client.chat.completions.create(
                     model=args.curator_model,
                     messages=[{"role": "user", "content": cur_prompt}],
