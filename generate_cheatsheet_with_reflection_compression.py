@@ -12,7 +12,7 @@ from utils_claude_with_compression import *
 
 #### API key information ####
 
-api_key = "6abf6e67-8dba-4653-9c70-ebebc51275b1"
+api_key = ""
 base_url = "https://api.sambanova.ai/v1"
 
 ###---------------------####

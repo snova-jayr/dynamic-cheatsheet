@@ -7,7 +7,7 @@ import re
 import time 
 from metrics import qa_score 
 
-from utils_claude import *
+from utils_gpt_v2 import *
 
 
 #### API key information ####
@@ -147,7 +147,9 @@ def main():
         if not relaxed_check_xbrl(final_answer, gt_answer): 
             for i in range(args.max_num_rounds):
                 # reflect 
-                reflection_prompt = reflector_prompt.format(question, gen_response, final_answer, gt_answer)
+                #reflection_prompt = reflector_prompt.format(question, gen_response, final_answer, gt_answer)
+                # reflection with gpt 
+                reflection_prompt = reflector_prompt.format(question, gen_response, final_answer, gt_answer, old_cheatsheet)
             
                 response = client.chat.completions.create(
                             model=args.reflector_model,
