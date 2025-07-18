@@ -11,6 +11,9 @@ from tqdm import tqdm
 import sklearn
 import evaluate
 import openai 
+from glob import glob
+import ast
+from sklearn.metrics.pairwise import cosine_similarity
 
 from datasets import load_dataset, load_from_disk
 from dynamic_cheatsheet.language_model import LanguageModel
@@ -26,7 +29,7 @@ base_url = "https://api.sambanova.ai/v1"
 
 ###---------------------####
 
-DATA_DIR = "/import/ml-sc-scratch2/shubhangiu/jays_dc_repo/dynamic-cheatsheet/data/finlora/test/" 
+DATA_DIR = "/import/snvm-sc-scratch2/jerrym/dynamic-cheatsheet/data/finlora/test/" 
 
 # Map task names to their JSONL files in the data/test directory
 dataset_path = {
@@ -110,6 +113,9 @@ def parse_arguments():
     parser.add_argument("--max_n_samples", type=int, default=-1, help="Maximum number of samples to process")
     parser.add_argument("--no_shuffle", action="store_true", help="Disable shuffling of the dataset")
     parser.add_argument("--sample_ratio", type=float, default=1.0)
+    parser.add_argument("--batch_size", type=int, default=2)
+    parser.add_argument("--num_train_sample", type=int, default=500)
+    parser.add_argument("--top_k_aggregate", type=int, default=5)
     args = parser.parse_args()
 
     # Convert to a dictionary for compatibility with the rest of the code
@@ -247,6 +253,46 @@ def process_batched(out_text_list, target_list):
     return processed_out_text_list, processed_target_list
 
 
+def api_with_backoff(client, model, prompt):
+    max_retries = 10
+    retry_count = 0
+    while retry_count < max_retries:
+        try:
+            response = client.chat.completions.create(
+                model=model,
+                messages=[{"role": "user", "content": prompt}],
+                temperature=0.0
+            )
+            break
+        except Exception as e:
+            print(f"Error occurred: {str(e)}")
+        # Calculate exponential backoff (base 2)
+        sleep_time = min(2 ** retry_count, 60)  # Cap at 60 seconds to avoid too long waits
+        print(f"Attempt {retry_count + 1} failed. Sleeping for {sleep_time} seconds...")
+        time.sleep(sleep_time)
+        retry_count += 1
+    return response
+
+def embedding_with_backoff(client, prompt):
+    max_retries = 10
+    retry_count = 0
+    while retry_count < max_retries:
+        try:
+            response = client.embeddings.create(
+                model="E5-Mistral-7B-Instruct",
+                input=[prompt]
+            )
+            break
+        except Exception as e:
+            print(f"Error occurred: {str(e)}")
+        # Calculate exponential backoff (base 2)
+        sleep_time = min(2 ** retry_count, 60)  # Cap at 60 seconds to avoid too long waits
+        print(f"Attempt {retry_count + 1} failed. Sleeping for {sleep_time} seconds...")
+        time.sleep(sleep_time)
+        retry_count += 1
+    return response.data[0].embedding
+
+
 def test_fin_tasks(args, data_name="xbrl_finer", prompt_fun=None):
     start_time = time.time()
     results = {}
@@ -264,11 +310,11 @@ def test_fin_tasks(args, data_name="xbrl_finer", prompt_fun=None):
         instructions = instructions.sample(frac=args.sample_ratio, random_state=42)
 
     # Read the prompt files
-    args.generator_prompt = read_file(args.generator_prompt_path)
-    if args.cheatsheet_prompt_path:
-        args.cheatsheet_prompt = read_file(args.cheatsheet_prompt_path)
-    else:
-        args.cheatsheet_prompt = "(empty)"
+    # args.generator_prompt = read_file(args.generator_prompt_path)
+    # if args.cheatsheet_prompt_path:
+    #     args.cheatsheet_prompt = read_file(args.cheatsheet_prompt_path)
+    # else:
+    #     args.cheatsheet_prompt = "(empty)"
 
     # Initialize the language model
     if args.approach_name == "test_with_global_cheatsheet":
@@ -282,9 +328,25 @@ def test_fin_tasks(args, data_name="xbrl_finer", prompt_fun=None):
     cheatsheet = "(empty)"
     reflection = "(empty)"
 
+    all_cheatsheet = []
     if args.cheatsheet_prompt_path is not None:
-        with open(args.cheatsheet_prompt_path, "r") as file:
-            cheatsheet = file.read()
+        if os.path.isfile(args.cheatsheet_prompt_path):
+            with open(args.cheatsheet_prompt_path, "r") as file:
+                cheatsheet = file.read()
+        else:
+            print("Getting all the delta cheatsheets...")
+            files = glob(args.cheatsheet_prompt_path + "/*")
+            for file_path in files:
+                with open(file_path, 'r') as f:
+                    all_cheatsheet.append(f.read())
+    print(f"Length of all cheatsheets: {len(all_cheatsheet)}")
+    print("Getting all question embeddings...")
+    embeddings_500 = []
+    with open("data/finlora/train/finer_train_batched_embeddings_500.txt", 'r') as f:
+        for line in f:
+            embeddings_500.append(ast.literal_eval(line))
+    embeddings_500 = embeddings_500[:args.num_train_sample]
+    print(f"Length of all question embeddings: {len(embeddings_500)}")
 
     time_stamp = datetime.today().strftime('%Y-%m-%d-%H-%M')
     args.save_path_name = f"{args.save_directory}/{data_name}/{args.model_name}_{args.approach_name}_{time_stamp}.jsonl"
@@ -346,20 +408,41 @@ def test_fin_tasks(args, data_name="xbrl_finer", prompt_fun=None):
         
         tmp_target = instructions['target'].tolist()[i]
         
-        time.sleep(10)
+        # time.sleep(10)
     
         if args.approach_name == "test_with_global_cheatsheet":
             # XBRL finer 
             index = tmp_context.index("Answer the following 4 independent questions by providing only")
             question_context, question = tmp_context[:index], tmp_context[index:]
+
+            if len(all_cheatsheet) > 0:
+                close_cheatsheet = []
+                question_embedding = embedding_with_backoff(model, question)
+                similarity = cosine_similarity(np.array([question_embedding]), np.array(embeddings_500))
+                close_questions_ranked = np.argsort(similarity[0])[::-1]//args.batch_size
+                close_questions = set()
+                for index in close_questions_ranked:
+                    if index not in close_questions:
+                        # edge case for delta cheatsheet num train sample not divisible by batch size, dropping last cheatsheet
+                        if index >= len(all_cheatsheet):
+                            continue
+                        close_cheatsheet.append(all_cheatsheet[index])
+                        close_questions.add(index)
+                    if len(close_cheatsheet) == args.top_k_aggregate:
+                        break
+                agg_prompt = aggregator_prompt.format(close_cheatsheet[0], close_cheatsheet[1], close_cheatsheet[2])
+                response = api_with_backoff(model, "Llama-4-Maverick-17B-128E-Instruct", agg_prompt)
+                cheatsheet = response.choices[0].message.content
+
             gen_prompt = generator_prompt.format(cheatsheet, reflection, question, question_context)
             #gen_prompt = tmp_context
             
-            response = model.chat.completions.create(
-                    model=args.model_name,
-                    messages=[{"role": "user", "content": gen_prompt}],
-                    temperature=0.0
-            )
+            # response = model.chat.completions.create(
+            #         model=args.model_name,
+            #         messages=[{"role": "user", "content": gen_prompt}],
+            #         temperature=0.0
+            # )
+            response = api_with_backoff(model, args.model_name, gen_prompt)
             try:
                 gen_response = response.choices[0].message.content
                 count += 1
@@ -401,12 +484,12 @@ def test_fin_tasks(args, data_name="xbrl_finer", prompt_fun=None):
         cheatsheet = output_dict["final_cheatsheet"]
         final_answer = output_dict["final_answer"]
 
-        print(f"@ CHEATSHEET:\n{cheatsheet}\n")
-        print('- ' * 50)
-        print(f"INPUT: {tmp_context}")
-        print(f"TARGET: {tmp_target}")
-        print(f"FINAL ANSWER: {final_answer}")
-        print("**" * 50)
+        # print(f"@ CHEATSHEET:\n{cheatsheet}\n")
+        # print('- ' * 50)
+        # print(f"INPUT: {tmp_context}")
+        # print(f"TARGET: {tmp_target}")
+        # print(f"FINAL ANSWER: {final_answer}")
+        # print("**" * 50)
         
         with open(args.save_path_name, "a") as f:
             f.write(f"INDEX: {i}\n")
