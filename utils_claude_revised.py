@@ -127,3 +127,28 @@ Updated Cheatsheet:
 
 """
 
+
+aggregator_prompt = """You are an expert editor and synthesizer of problem-solving cheatsheets. Your task is to take multiple cheatsheets, each containing problem-solving strategies, and aggregate them into a single comprehensive cheatsheet.
+
+Requirements:
+1. Eliminate redundancy: If multiple cheatsheets contain overlapping or duplicate entries, ensure that only one clear, concise version appears in the final cheatsheet.
+2. Preserve structure: Maintain the structure and organization of the original cheatsheets — including sections, categories, and formatting — so that the final cheatsheet is easy to navigate. Do not simply concatenate the inputs.
+3. Consolidate intelligently: If strategies from different cheatsheets complement each other, merge them thoughtfully into a unified entry.
+4. Be concise and precise: The final cheatsheet should be compact, clear, and actionable, without unnecessary repetition or verbosity.
+5. Use consistent formatting: Ensure uniform formatting across all entries to make the cheatsheet look like a coherent document rather than a stitched-together collection.
+
+Output:
+A single, cleanly organized cheatsheet that captures all unique problem-solving strategies from the inputs, free of duplication and redundant information, while preserving clarity and logical structure.
+
+Below are all the cheatsheets:
+<START>
+# Cheatsheet 1 
+{}
+
+# Cheatsheet 2 
+{}
+
+# Cheatsheet 3 
+{}
+<END>
+"""

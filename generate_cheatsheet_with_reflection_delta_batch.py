@@ -5,6 +5,7 @@ import openai
 import random 
 import re 
 import time 
+import os
 from metrics import qa_score 
 
 from utils_claude import *
@@ -75,6 +76,7 @@ def parse_args():
     parser.add_argument("--generator_model", type=str, default="Meta-Llama-3.1-8B-Instruct")
     parser.add_argument("--max_num_rounds", type=int, default=3)
     parser.add_argument("--save_path", type=str, required=True)
+    parser.add_argument("--batch_size", type=int, default=1)
     args = parser.parse_args()
     return args 
 
@@ -100,6 +102,26 @@ def relaxed_check(final_answer, gt_answer):
     if score > 0.4: return True 
     return False 
 
+def api_with_backoff(client, model, prompt):
+    max_retries = 10
+    retry_count = 0
+    while retry_count < max_retries:
+        try:
+            response = client.chat.completions.create(
+                model=model,
+                messages=[{"role": "user", "content": prompt}],
+                temperature=0.0
+            )
+            break
+        except Exception as e:
+            print(f"Error occurred: {str(e)}")
+        # Calculate exponential backoff (base 2)
+        sleep_time = min(2 ** retry_count, 60)  # Cap at 60 seconds to avoid too long waits
+        print(f"Attempt {retry_count + 1} failed. Sleeping for {sleep_time} seconds...")
+        time.sleep(sleep_time)
+        retry_count += 1
+    return response
+
 def main():
     args = parse_args()
     client = initialize_client()
@@ -116,8 +138,13 @@ def main():
 
     old_cheatsheet = "(empty)"
 
+    batch_size = args.batch_size
+    batch_index = 1
     for sample in all_samples:
-        time.sleep(60) # to avoid hitting rate limits 
+        if batch_index > batch_size:
+            old_cheatsheet = "(empty)"
+            batch_index = 1
+        # time.sleep(60) # to avoid hitting rate limits 
         print(f"==========processing question {question_counts}==========")
         task_dict = ast.literal_eval(sample)
         reflection = "(empty)"
@@ -135,11 +162,7 @@ def main():
         # get answer from generator 
         gen_prompt = generator_prompt.format(old_cheatsheet, reflection, question, context)
         
-        response = client.chat.completions.create(
-                    model=args.generator_model,
-                    messages=[{"role": "user", "content": gen_prompt}],
-                    temperature=0.0
-        )
+        response = api_with_backoff(client, args.generator_model, gen_prompt)
 
         gen_response = response.choices[0].message.content
         final_answer = extract_answer(gen_response)
@@ -151,39 +174,31 @@ def main():
                 # reflection with gpt 
                 # reflection_prompt = reflector_prompt.format(question, gen_response, final_answer, gt_answer, old_cheatsheet)
             
-                response = client.chat.completions.create(
-                            model=args.reflector_model,
-                            messages=[{"role": "user", "content": reflection_prompt}],
-                            temperature=0.0
-                )
+                response = api_with_backoff(client, args.reflector_model, reflection_prompt)
                 reflection = response.choices[0].message.content
              
                 # generate after reflection 
                 gen_prompt = generator_prompt.format(old_cheatsheet, reflection, question, context)
             
-                response = client.chat.completions.create(
-                            model=args.generator_model,
-                            messages=[{"role": "user", "content": gen_prompt}],
-                            temperature=0.0
-                )
+                response = api_with_backoff(client, args.generator_model, gen_prompt)
                 gen_response = response.choices[0].message.content
                 final_answer = extract_answer(gen_response)
                 if relaxed_check_xbrl(final_answer, gt_answer): break 
 
         # generate cheatsheet
         cur_prompt = curator_prompt.format(old_cheatsheet, reflection, question, gen_response)
-        response = client.chat.completions.create(
-                    model=args.curator_model,
-                    messages=[{"role": "user", "content": cur_prompt}],
-                    temperature=0.0
-        )
+        response = api_with_backoff(client, args.curator_model, cur_prompt)
         response = response.choices[0].message.content
         new_cheatsheet = extract_cheatsheet(response, old_cheatsheet)
         old_cheatsheet = new_cheatsheet
-        if question_counts % 10 == 0:
+        if question_counts % batch_size == 0:
             # save generated cheatsheet
-            open(f"{args.save_path}/trial_question_{question_counts}.txt", "w+").write(new_cheatsheet)
+            save_path = f"{args.save_path}/batch_size_{args.batch_size}/trial_question_{question_counts}.txt"
+            dir_path = os.path.dirname(save_path)
+            os.makedirs(dir_path, exist_ok=True)
+            open(save_path, "w+").write(new_cheatsheet)
         question_counts += 1
+        batch_index += 1
 
 if __name__=="__main__":
     main()
