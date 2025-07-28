@@ -13,7 +13,7 @@ from utils_claude import *
 
 #### API key information ####
 
-api_key = ""
+api_key = os.environ['SAMBANOVA_API_KEY']
 base_url = "https://api.sambanova.ai/v1"
 
 ###---------------------####
