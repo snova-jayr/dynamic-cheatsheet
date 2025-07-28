@@ -24,12 +24,12 @@ from utils_claude_revised import *
 
 #### API key information ####
 
-api_key = ""
+api_key = os.environ['SAMBANOVA_API_KEY']
 base_url = "https://api.sambanova.ai/v1"
 
 ###---------------------####
 
-DATA_DIR = "/import/snvm-sc-scratch2/jerrym/dynamic-cheatsheet/data/finlora/test/" 
+DATA_DIR = "./data/finlora/test/" 
 
 # Map task names to their JSONL files in the data/test directory
 dataset_path = {
@@ -91,6 +91,9 @@ def parse_arguments():
     # Paths to the prompt files
     parser.add_argument("--generator_prompt_path", type=str, default="prompts/simple_generator.txt", help="Path to the generator prompt file")
     parser.add_argument("--cheatsheet_prompt_path", type=str, default=None, help="Path to the cheatsheet prompt file")
+    
+    # Fixed cheatsheet path for fixed_cheatsheet approach
+    parser.add_argument("--fixed_cheatsheet_path", type=str, default=None, help="Path to the fixed cheatsheet file (for fixed_cheatsheet approach)")
 
     # Additional model-related arguments
     parser.add_argument("--max_tokens", type=int, default=2048, help="Maximum number of tokens")
@@ -317,7 +320,7 @@ def test_fin_tasks(args, data_name="xbrl_finer", prompt_fun=None):
     #     args.cheatsheet_prompt = "(empty)"
 
     # Initialize the language model
-    if args.approach_name == "test_with_global_cheatsheet":
+    if args.approach_name in ["test_with_global_cheatsheet", "no_cheatsheet", "fixed_cheatsheet"]:
         model = initialize_client()
     else:
         model = LanguageModel(
@@ -435,13 +438,6 @@ def test_fin_tasks(args, data_name="xbrl_finer", prompt_fun=None):
                 cheatsheet = response.choices[0].message.content
 
             gen_prompt = generator_prompt.format(cheatsheet, reflection, question, question_context)
-            #gen_prompt = tmp_context
-            
-            # response = model.chat.completions.create(
-            #         model=args.model_name,
-            #         messages=[{"role": "user", "content": gen_prompt}],
-            #         temperature=0.0
-            # )
             response = api_with_backoff(model, args.model_name, gen_prompt)
             try:
                 gen_response = response.choices[0].message.content
@@ -449,12 +445,61 @@ def test_fin_tasks(args, data_name="xbrl_finer", prompt_fun=None):
             except: 
                 continue 
         
-            #final_answer = gen_response 
             final_answer = extract_answer(gen_response)
             output_dict = {}
             output_dict["final_output"] = gen_response 
             output_dict["final_answer"] = final_answer
             output_dict["final_cheatsheet"] = cheatsheet
+            
+        elif args.approach_name == "no_cheatsheet":
+            # No cheatsheet approach - use empty cheatsheet
+            index = tmp_context.index("Answer the following 4 independent questions by providing only")
+            question_context, question = tmp_context[:index], tmp_context[index:]
+            
+            # Set cheatsheet to empty
+            cheatsheet = "(empty)"
+            
+            gen_prompt = generator_prompt.format(cheatsheet, reflection, question, question_context)
+            response = api_with_backoff(model, args.model_name, gen_prompt)
+            try:
+                gen_response = response.choices[0].message.content
+                count += 1
+            except: 
+                continue 
+        
+            final_answer = extract_answer(gen_response)
+            output_dict = {}
+            output_dict["final_output"] = gen_response 
+            output_dict["final_answer"] = final_answer
+            output_dict["final_cheatsheet"] = cheatsheet
+            
+        elif args.approach_name == "fixed_cheatsheet":
+            # Fixed cheatsheet approach - use the provided fixed cheatsheet
+            index = tmp_context.index("Answer the following 4 independent questions by providing only")
+            question_context, question = tmp_context[:index], tmp_context[index:]
+            
+            # Load fixed cheatsheet from file
+            if args.fixed_cheatsheet_path and os.path.isfile(args.fixed_cheatsheet_path):
+                with open(args.fixed_cheatsheet_path, "r") as file:
+                    cheatsheet = file.read()
+            else:
+                print(f"Warning: Fixed cheatsheet path not provided or file not found: {args.fixed_cheatsheet_path}")
+                cheatsheet = "(empty)"
+            
+            gen_prompt = generator_prompt.format(cheatsheet, reflection, question, question_context)
+            response = api_with_backoff(model, args.model_name, gen_prompt)
+            try:
+                gen_response = response.choices[0].message.content
+                count += 1
+            except: 
+                continue 
+        
+            final_answer = extract_answer(gen_response)
+            output_dict = {}
+            output_dict["final_output"] = gen_response 
+            output_dict["final_answer"] = final_answer
+            output_dict["final_cheatsheet"] = cheatsheet
+            
         else:
             output_dict = model.advanced_generate(
                 approach_name=args.approach_name,
