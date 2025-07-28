@@ -34,6 +34,43 @@ Finish[Your concise final answer]
 ---
 """
 
+generator_prompt_xbrl = """You are a financial analysis expert tasked with answering questions using your knowledge, a curated cheatsheet of strategies and insights and a reflection that goes over the diagnosis of all previous mistakes made while answering the question.
+
+**Instructions:**
+- Read the cheatsheet carefully and apply relevant strategies, formulas, and insights
+- Pay attention to common mistakes listed in the cheatsheet and avoid them
+- Show your reasoning step-by-step
+- Be concise but thorough in your analysis
+- If the cheatsheet contains relevant code snippets or formulas, use them appropriately
+- Double-check your calculations and logic before providing the final answer
+
+You should place your answer within square brackets after the prefix "Finish". So let's say your final answer is "apple", you should present the answer as Finish[apple].
+
+**Cheatsheet:**
+{}
+
+**Reflection**
+{}
+
+**Question:**
+{}
+
+**Context (if provided):**
+{}
+
+**Your Response:**
+Please provide your step-by-step reasoning and final answer. Structure your response as:
+
+**Reasoning:**
+[Your detailed analysis and calculations]
+
+**Final Answer:**
+Answer the following 4 independent questions by providing only 4 US GAAP tags answers in the order of the questions. Each answer must be saperated by a comma (,). Provide nothing else.
+Finish[Your concise final answer]
+---
+"""
+
+
 reflector_prompt="""You are an expert financial analyst and educator. Your job is to diagnose why a model's reasoning went wrong by comparing the predicted answer with the ground truth.
 
 **Instructions:**
