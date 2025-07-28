@@ -15,14 +15,141 @@ from glob import glob
 import ast
 from sklearn.metrics.pairwise import cosine_similarity
 
+
 from datasets import load_dataset, load_from_disk
 from dynamic_cheatsheet.language_model import LanguageModel
 from dynamic_cheatsheet.utils.evaluation import eval_for_GameOf24, eval_for_multiple_choice, eval_for_exact_matching_with_no_punctuation, eval_equation_balancer
 
 from dotenv import load_dotenv
-from utils_claude_revised import * 
+# from utils_claude_revised import * 
 
+from utils_claude import *
 
+# Add detailed logging functionality
+def log_llm_call(log_dir, call_info):
+    """
+    Log detailed information about each LLM call
+    
+    Args:
+        log_dir: Directory to save logs
+        call_info: Dictionary containing call information
+    """
+    if not os.path.exists(log_dir):
+        os.makedirs(log_dir, exist_ok=True)
+    
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")[:-3]  # Include milliseconds
+    filename = f"{call_info['role']}_{call_info['call_id']}_{timestamp}.json"
+    filepath = os.path.join(log_dir, filename)
+    
+    # Add timestamp to call_info
+    call_info['timestamp'] = timestamp
+    call_info['datetime'] = datetime.now().isoformat()
+    
+    # Save to JSON file
+    with open(filepath, 'w', encoding='utf-8') as f:
+        json.dump(call_info, f, indent=2, ensure_ascii=False)
+    
+    print(f"[LOG] {call_info['role']} call logged to {filename}")
+
+def timed_llm_call(client, model, prompt, role='default', call_id=0, max_tokens=4096, log_dir='./log_llm_call', sleep_seconds=30, retries_on_timeout=5, attempt=10):
+    """
+    Make an LLM call with detailed timing and logging
+    
+    Args:
+        client: OpenAI client
+        model: Model name
+        prompt: Input prompt
+        role: Role of the LLM (generator/reflector/curator)
+        call_id: Unique identifier for this call
+        log_dir: Directory to save logs (optional)
+    
+    Returns:
+        Tuple of (response_content, call_info)
+    """
+    start_time = time.time()
+    prompt_time = time.time()
+    
+    print(f"[{role.upper()}] Starting call {call_id}...")
+    while True:
+        try:
+            response = client.chat.completions.create(
+                model=model,
+                messages=[{"role": "user", "content": prompt}],
+                temperature=0.0,
+                max_tokens=max_tokens
+                
+            )
+
+            response_time = time.time()
+            total_time = response_time - start_time
+
+            response_content = response.choices[0].message.content
+
+            # Create detailed call info
+            call_info = {
+                "role": role,
+                "call_id": call_id,
+                "model": model,
+                "prompt": prompt,
+                "response": response_content,
+                "prompt_time": prompt_time - start_time,  # Time to prepare prompt
+                "response_time": response_time - prompt_time,  # Time to get response
+                "total_time": total_time,
+                "prompt_length": len(prompt),
+                "response_length": len(response_content),
+            }
+
+            print(f"[{role.upper()}] Call {call_id} completed in {total_time:.2f}s")
+
+            # Log if directory provided
+            if log_dir:
+                log_llm_call(log_dir, call_info)
+
+            return response_content, call_info
+
+        except Exception as e:
+            is_timeout = any(k in str(e).lower() for k in ["timeout", "timed out", "exceeded"])
+            if is_timeout and attempt < retries_on_timeout:
+                attempt += 1
+                print(f"[{role.upper()}] Call {call_id} timed out, sleeping {sleep_seconds}s then retrying "
+                      f"({attempt}/{retries_on_timeout}) ...")
+                time.sleep(sleep_seconds)
+                continue
+
+            error_time = time.time()
+            call_info = {
+                "role": role,
+                "call_id": call_id,
+                "model": model,
+                "prompt": prompt,
+                "error": str(e),
+                "total_time": error_time - start_time,
+                "prompt_length": len(prompt),
+                "attempt": attempt,
+            }
+
+            print(f"[{role.upper()}] Call {call_id} failed after {error_time - start_time:.2f}s: {e}")
+
+            if log_dir:
+                log_llm_call(log_dir, call_info)
+
+            raise e        
+            error_time = time.time()
+            call_info = {
+                "role": role,
+                "call_id": call_id,
+                "model": model,
+                "prompt": prompt,
+                "error": str(e),
+                "total_time": error_time - start_time,
+                "prompt_length": len(prompt),
+            }
+
+            print(f"[{role.upper()}] Call {call_id} failed after {error_time - start_time:.2f}s: {e}")
+
+            if log_dir:
+                log_llm_call(log_dir, call_info)
+            raise e
 
 def save_detailed_log(detailed_log_dir, question_idx, question_data):
     """
@@ -46,6 +173,11 @@ def save_detailed_log(detailed_log_dir, question_idx, question_data):
 
 api_key = os.environ['SAMBANOVA_API_KEY']
 base_url = "https://api.sambanova.ai/v1"
+
+
+# Together (optional)
+together_api_key = "88a1d88159eafbd25672f8a7271f07ed97a000553d49f0731bfdfcfd7ed2a35b"
+together_base_url = "https://api.together.xyz/v1"
 
 ###---------------------####
 
@@ -109,7 +241,7 @@ def parse_arguments():
     parser.add_argument("--model_name", type=str, default="openai/gpt-4o-mini", help="Model name")
 
     # Paths to the prompt files
-    parser.add_argument("--generator_prompt_path", type=str, default="prompts/simple_generator.txt", help="Path to the generator prompt file")
+
     parser.add_argument("--cheatsheet_prompt_path", type=str, default=None, help="Path to the cheatsheet prompt file")
     
     # ADD THIS NEW PARAMETER FOR FIXED CHEATSHEET
@@ -142,10 +274,13 @@ def parse_arguments():
     parser.add_argument("--batch_size", type=int, default=2)
     parser.add_argument("--num_train_sample", type=int, default=500)
     parser.add_argument("--top_k_aggregate", type=int, default=5)
+    parser.add_argument("--use_together_api", action="store_true", help="Use Together API instead of SambaNova")    
     args = parser.parse_args()
 
     # Convert to a dictionary for compatibility with the rest of the code
     return args
+
+
 
 def read_file(file_path: str) -> str:
     """
@@ -167,7 +302,10 @@ def write_jsonl(file_path, data):
             file.write(json.dumps(line) + "\n")
 
 
-def initialize_client():
+def initialize_client(use_together_api=False):
+    if use_together_api: 
+        base_url = together_base_url
+        api_key = '88a1d88159eafbd25672f8a7271f07ed97a000553d49f0731bfdfcfd7ed2a35b'
     client = openai.OpenAI(api_key=api_key, base_url=base_url)
     return client
 
@@ -344,7 +482,7 @@ def test_fin_tasks(args, data_name="xbrl_finer", prompt_fun=None):
 
     # Initialize the language model
     if args.approach_name in ["test_with_global_cheatsheet", "no_cheatsheet", "fixed_cheatsheet"]:
-        model = initialize_client()
+        model = initialize_client(args.use_together_api)
     else:
         model = LanguageModel(
             model_name=args.model_name,
@@ -463,13 +601,15 @@ def test_fin_tasks(args, data_name="xbrl_finer", prompt_fun=None):
                     if len(close_cheatsheet) == args.top_k_aggregate:
                         break
                 agg_prompt = aggregator_prompt.format(close_cheatsheet[0], close_cheatsheet[1], close_cheatsheet[2])
-                response = api_with_backoff(model, "Llama-4-Maverick-17B-128E-Instruct", agg_prompt)
-                cheatsheet = response.choices[0].message.content
+                response = timed_llm_call(model, "Llama-4-Maverick-17B-128E-Instruct", agg_prompt)
+                # cheatsheet = response.choices[0].message.content
+                cheatsheet = response[0]                
 
             gen_prompt = generator_prompt.format(cheatsheet, reflection, question, question_context)
-            response = api_with_backoff(model, args.model_name, gen_prompt)
+            response = timed_llm_call(model, args.model_name, gen_prompt)
             try:
-                gen_response = response.choices[0].message.content
+                # gen_response = response.choices[0].message.content
+                gen_response = response[0]
                 count += 1
             except: 
                 continue 
@@ -509,9 +649,10 @@ def test_fin_tasks(args, data_name="xbrl_finer", prompt_fun=None):
             cheatsheet = "(empty)"
             
             gen_prompt = generator_prompt.format(cheatsheet, reflection, question, question_context)
-            response = api_with_backoff(model, args.model_name, gen_prompt)
+            response = timed_llm_call(model, args.model_name, gen_prompt)
             try:
-                gen_response = response.choices[0].message.content
+                # gen_response = response.choices[0].message.content
+                gen_response = response[0]
                 count += 1
             except: 
                 continue 
@@ -541,6 +682,7 @@ def test_fin_tasks(args, data_name="xbrl_finer", prompt_fun=None):
                 save_detailed_log(detailed_log_dir, i, detailed_log_data)
             
         elif args.approach_name == "fixed_cheatsheet":
+
             # Fixed cheatsheet approach - use the provided fixed cheatsheet
             index = tmp_context.index("Answer the following 4 independent questions by providing only")
             question_context, question = tmp_context[:index], tmp_context[index:]
@@ -554,9 +696,10 @@ def test_fin_tasks(args, data_name="xbrl_finer", prompt_fun=None):
                 cheatsheet = "(empty)"
             
             gen_prompt = generator_prompt.format(cheatsheet, reflection, question, question_context)
-            response = api_with_backoff(model, args.model_name, gen_prompt)
+            response = timed_llm_call(model, args.model_name, gen_prompt)
             try:
-                gen_response = response.choices[0].message.content
+                # gen_response = response.choices[0].message.content
+                gen_response = response[0]
                 count += 1
             except: 
                 continue 
@@ -585,6 +728,7 @@ def test_fin_tasks(args, data_name="xbrl_finer", prompt_fun=None):
                     "fixed_cheatsheet_path": args.fixed_cheatsheet_path
                 }
                 save_detailed_log(detailed_log_dir, i, detailed_log_data)
+
             
         else:
             output_dict = model.advanced_generate(

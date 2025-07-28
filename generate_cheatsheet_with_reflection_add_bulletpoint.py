@@ -8,7 +8,8 @@ import time
 import os
 import numpy as np
 from metrics import qa_score 
-import datetime
+from datetime import datetime
+from memory_profiler import profile
 
 # Add detailed logging functionality
 def log_llm_call(log_dir, call_info):
@@ -22,13 +23,13 @@ def log_llm_call(log_dir, call_info):
     if not os.path.exists(log_dir):
         os.makedirs(log_dir, exist_ok=True)
     
-    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S_%f")[:-3]  # Include milliseconds
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")[:-3]  # Include milliseconds
     filename = f"{call_info['role']}_{call_info['call_id']}_{timestamp}.json"
     filepath = os.path.join(log_dir, filename)
     
     # Add timestamp to call_info
     call_info['timestamp'] = timestamp
-    call_info['datetime'] = datetime.datetime.now().isoformat()
+    call_info['datetime'] = datetime.now().isoformat()
     
     # Save to JSON file
     with open(filepath, 'w', encoding='utf-8') as f:
@@ -36,7 +37,7 @@ def log_llm_call(log_dir, call_info):
     
     print(f"[LOG] {call_info['role']} call logged to {filename}")
 
-def timed_llm_call(client, model, prompt, role, call_id, log_dir=None):
+def timed_llm_call(client, model, prompt, role, call_id, max_tokens=4096, log_dir=None, sleep_seconds=30, retries_on_timeout=5, attempt=10):
     """
     Make an LLM call with detailed timing and logging
     
@@ -55,59 +56,86 @@ def timed_llm_call(client, model, prompt, role, call_id, log_dir=None):
     prompt_time = time.time()
     
     print(f"[{role.upper()}] Starting call {call_id}...")
-    
-    try:
-        response = client.chat.completions.create(
-            model=model,
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.0
-        )
-        
-        response_time = time.time()
-        total_time = response_time - start_time
-        
-        response_content = response.choices[0].message.content
-        
-        # Create detailed call info
-        call_info = {
-            "role": role,
-            "call_id": call_id,
-            "model": model,
-            "prompt": prompt,
-            "response": response_content,
-            "prompt_time": prompt_time - start_time,  # Time to prepare prompt
-            "response_time": response_time - prompt_time,  # Time to get response
-            "total_time": total_time,
-            "prompt_length": len(prompt),
-            "response_length": len(response_content),
-        }
-        
-        print(f"[{role.upper()}] Call {call_id} completed in {total_time:.2f}s")
-        
-        # Log if directory provided
-        if log_dir:
-            log_llm_call(log_dir, call_info)
-        
-        return response_content, call_info
-    
-    except Exception as e:
-        error_time = time.time()
-        call_info = {
-            "role": role,
-            "call_id": call_id,
-            "model": model,
-            "prompt": prompt,
-            "error": str(e),
-            "total_time": error_time - start_time,
-            "prompt_length": len(prompt),
-        }
-        
-        print(f"[{role.upper()}] Call {call_id} failed after {error_time - start_time:.2f}s: {e}")
-        
-        if log_dir:
-            log_llm_call(log_dir, call_info)
-        
-        raise e
+    while True:
+        try:
+            response = client.chat.completions.create(
+                model=model,
+                messages=[{"role": "user", "content": prompt}],
+                temperature=0.0,
+                max_tokens=max_tokens
+                
+            )
+
+            response_time = time.time()
+            total_time = response_time - start_time
+
+            response_content = response.choices[0].message.content
+
+            # Create detailed call info
+            call_info = {
+                "role": role,
+                "call_id": call_id,
+                "model": model,
+                "prompt": prompt,
+                "response": response_content,
+                "prompt_time": prompt_time - start_time,  # Time to prepare prompt
+                "response_time": response_time - prompt_time,  # Time to get response
+                "total_time": total_time,
+                "prompt_length": len(prompt),
+                "response_length": len(response_content),
+            }
+
+            print(f"[{role.upper()}] Call {call_id} completed in {total_time:.2f}s")
+
+            # Log if directory provided
+            if log_dir:
+                log_llm_call(log_dir, call_info)
+
+            return response_content, call_info
+
+        except Exception as e:
+            is_timeout = any(k in str(e).lower() for k in ["timeout", "timed out", "exceeded"])
+            if is_timeout and attempt < retries_on_timeout:
+                attempt += 1
+                print(f"[{role.upper()}] Call {call_id} timed out, sleeping {sleep_seconds}s then retrying "
+                      f"({attempt}/{retries_on_timeout}) ...")
+                time.sleep(sleep_seconds)
+                continue
+
+            error_time = time.time()
+            call_info = {
+                "role": role,
+                "call_id": call_id,
+                "model": model,
+                "prompt": prompt,
+                "error": str(e),
+                "total_time": error_time - start_time,
+                "prompt_length": len(prompt),
+                "attempt": attempt,
+            }
+
+            print(f"[{role.upper()}] Call {call_id} failed after {error_time - start_time:.2f}s: {e}")
+
+            if log_dir:
+                log_llm_call(log_dir, call_info)
+
+            raise e        
+            error_time = time.time()
+            call_info = {
+                "role": role,
+                "call_id": call_id,
+                "model": model,
+                "prompt": prompt,
+                "error": str(e),
+                "total_time": error_time - start_time,
+                "prompt_length": len(prompt),
+            }
+
+            print(f"[{role.upper()}] Call {call_id} failed after {error_time - start_time:.2f}s: {e}")
+
+            if log_dir:
+                log_llm_call(log_dir, call_info)
+            raise e
 
 from utils_claude import *
 # Import evaluation functions from run_benchmark_finlora.py to ensure comparable results
@@ -129,7 +157,7 @@ sambanova_curator_api_key = "3f4abfeb-79a6-47d6-99d8-c08d21431db2"
 sambanova_base_url = "https://api.sambanova.ai/v1"
 
 # Together (optional)
-together_api_key = "d5365c77f1ed57d2266be68a10463bb05cb2eb6996555c50c0b649b12b5755e9"
+together_api_key = "88a1d88159eafbd25672f8a7271f07ed97a000553d49f0731bfdfcfd7ed2a35b"
 together_base_url = "https://api.together.xyz/v1"
 
 ###---------------------####
@@ -495,15 +523,17 @@ def parse_context_and_question(all_context):
 def parse_args():
     parser = argparse.ArgumentParser(description='Description of your program.')
     parser.add_argument("--dataset_path", required=True, type=str)
-    parser.add_argument("--test_dataset_path", type=str, default="data/finlora/test/finer_test_broken_down.jsonl", help="Path to test dataset for evaluation")
+    parser.add_argument("--test_dataset_path", type=str, default="data/finlora/test/finer_test_batched.jsonl", help="Path to test dataset for evaluation")
     parser.add_argument("--num_samples", default=-1, type=int)
-    parser.add_argument("--num_test_samples", default=100, type=int, help="Number of test samples to evaluate each epoch")
+    parser.add_argument("--sample_ratio", default=0.06, type=float, help="Number of test samples to evaluate each epoch")
     parser.add_argument("--curator_model", type=str, default="Llama-4-Maverick-17B-128E-Instruct")
     parser.add_argument("--reflector_model", type=str, default="Llama-4-Maverick-17B-128E-Instruct")
     parser.add_argument("--generator_model", type=str, default="Meta-Llama-3.1-8B-Instruct")
     parser.add_argument("--max_num_rounds", type=int, default=3)
     parser.add_argument("--save_path", type=str, required=True)
     parser.add_argument("--num_epochs", type=int, default=2, help="Number of training epochs")
+    parser.add_argument("--eval_steps", type=int, default=100, help="Number of steps to do one eval")    
+    parser.add_argument("--max_tokens", type=int, default=4096, help="Number of max tokens to generate")
     parser.add_argument("--use_together_api", action="store_true", help="Use Together API instead of SambaNova")
     args = parser.parse_args()
     return args 
@@ -537,7 +567,7 @@ def initialize_clients(use_together=False):
 
 def get_sleep_time(use_together=False):
     """Get appropriate sleep time based on API provider"""
-    return 2 if use_together else 60
+    return 2 if use_together else 2
 
 
 def relaxed_check_xbrl(final_answer, gt_answer):
@@ -567,7 +597,7 @@ def evaluate_single_answer(final_answer, gt_answer):
     return relaxed_check_xbrl(final_answer, gt_answer)
 
 
-def evaluate_test_set(generator_client, generator_model, cheatsheet, test_samples, num_samples=100, log_dir=None):
+def evaluate_test_set(generator_client, generator_model, cheatsheet, test_samples, sample_ratio=1.0, max_tokens=4096, log_dir=None):
     """
     Evaluate the current cheatsheet on test data
     
@@ -575,14 +605,19 @@ def evaluate_test_set(generator_client, generator_model, cheatsheet, test_sample
         dict: evaluation results
     """
     print(f"\n{'='*40}")
-    print(f"EVALUATING ON TEST SET ({num_samples} samples)")
+    print(f"EVALUATING ON TEST SET ({len(test_samples)*sample_ratio} samples)")
     print(f"{'='*40}")
     
     # Limit test samples
-    if len(test_samples) > num_samples:
-        # Use random sampling for fair evaluation
-        random.seed(42)  # Fixed seed for reproducible evaluation
-        test_samples = random.sample(test_samples, num_samples)
+    # if len(test_samples) > num_samples:
+    #     # Use random sampling for fair evaluation
+    #     random.seed(42)  # Fixed seed for reproducible evaluation
+    #     test_samples = random.sample(test_samples, num_samples)
+
+    if sample_ratio < 1.0:
+        random.seed(42)     # 设置随机种子（保证每次结果一样）
+        sample_size = int(len(test_samples) * sample_ratio)
+        test_samples = random.sample(test_samples, sample_size)
     
     test_correct = 0
     test_total = 0
@@ -607,7 +642,7 @@ def evaluate_test_set(generator_client, generator_model, cheatsheet, test_sample
             call_id = f"test_eval_{i}"
             gen_response, call_info = timed_llm_call(
                 generator_client, generator_model, gen_prompt, 
-                "generator", call_id, log_dir
+                "generator", call_id, max_tokens, log_dir
             )
             final_answer = extract_answer(gen_response)
             
@@ -645,13 +680,13 @@ def evaluate_test_set(generator_client, generator_model, cheatsheet, test_sample
         "total_count": test_total
     }
 
-
+# @profile
 def main():
     args = parse_args()
     generator_client, reflector_client, curator_client = initialize_clients(args.use_together_api)
 
     # Create timestamped run folder with key information
-    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     api_type = "together" if args.use_together_api else "sambanova"
     
     # Extract model name for folder (just the model part, not the full path)
@@ -703,11 +738,12 @@ def main():
         "curator_model": args.curator_model,
         "num_epochs": args.num_epochs,
         "num_samples": args.num_samples,
-        "num_test_samples": args.num_test_samples,
+        "sample_ratio": args.sample_ratio,
         "max_num_rounds": args.max_num_rounds,
         "dataset_path": args.dataset_path,
         "test_dataset_path": args.test_dataset_path,
-        "use_together_api": args.use_together_api
+        "use_together_api": args.use_together_api,
+        'max_tokens': args.max_tokens,
     }
     
     config_path = os.path.join(full_save_path, "run_config.json")
@@ -715,8 +751,8 @@ def main():
         json.dump(config_info, f, indent=2)
     
     # Initialize tracking variables
-    epoch_results = []
-    current_cheatsheet = "(empty)"
+    results = []
+    cheatsheet = "(empty)"
     
     # Use model names directly from args
     generator_model = args.generator_model
@@ -724,7 +760,9 @@ def main():
     curator_model = args.curator_model
     sleep_time = get_sleep_time(args.use_together_api)
     
-    for epoch in range(args.num_epochs):
+    # from tqdm.notebook import tqdm
+    from tqdm import tqdm
+    for epoch in tqdm(range(args.num_epochs)):
         print(f"\n{'='*60}")
         print(f"STARTING EPOCH {epoch + 1}/{args.num_epochs}")
         print(f"Using models: Generator={generator_model}, Reflector={reflector_model}, Curator={curator_model}")
@@ -736,12 +774,34 @@ def main():
         epoch_total = 0
         epoch_answers = []
         epoch_targets = []
-        question_counts = 1
-        old_cheatsheet = current_cheatsheet
         
-        for sample in all_samples:
-            time.sleep(sleep_time) # Adaptive sleep time based on API
-            print(f"==========Epoch {epoch+1}, Question {question_counts}==========")
+        
+        # Eval before any training as the baseline
+        # TODO: abstract the eval into a function, so here and the per eval_steps eval can both use
+        test_results = {}
+        if test_samples:
+            test_results = evaluate_test_set(generator_client, generator_model, cheatsheet, test_samples, args.sample_ratio, args.max_tokens, log_dir)
+        result = {
+            "epoch": epoch + 1,
+            "eval_steps": 0,
+            "train_accuracy": 0,
+            "train_correct_count": epoch_correct,
+            "train_total_count": epoch_total,
+            "test_accuracy": test_results.get("processed_accuracy", 0),
+            "test_correct_count": test_results.get("correct_count", 0),
+            "test_total_count": test_results.get("total_count", 0),
+            "cheatsheet_length": len(cheatsheet),
+            "cheatsheet": cheatsheet
+        }
+        results.append(result) 
+                
+        
+        
+        
+        for step, sample in enumerate(all_samples):               
+            
+            # time.sleep(sleep_time) # Adaptive sleep time based on API
+            print(f"==========Epoch {epoch+1}, Question {step}==========")
             task_dict = ast.literal_eval(sample)
             reflection = "(empty)"
             all_context  = task_dict["context"]
@@ -754,13 +814,13 @@ def main():
             gt_answer = task_dict["target"]
        
             # get answer from generator (using generator_client)
-            gen_prompt = generator_prompt.format(old_cheatsheet, reflection, question, context)
+            gen_prompt = generator_prompt.format(cheatsheet, reflection, question, context)
             
             # Use timed LLM call with logging
-            call_id = f"train_gen_initial_{question_counts}"
+            call_id = f"train_gen_initial_{step}"
             gen_response, call_info = timed_llm_call(
                 generator_client, generator_model, gen_prompt, 
-                "generator", call_id, log_dir
+                "generator", call_id, args.max_tokens, log_dir
             )
             final_answer = extract_answer(gen_response)
             
@@ -783,20 +843,20 @@ def main():
                     reflection_prompt = reflector_prompt.format(question, gen_response, final_answer, gt_answer)
                     
                     # Use timed LLM call with logging
-                    call_id = f"train_reflect_{question_counts}_round_{i}"
+                    call_id = f"train_reflect_{step}_round_{i}"
                     reflection, call_info = timed_llm_call(
                         reflector_client, reflector_model, reflection_prompt, 
-                        "reflector", call_id, log_dir
+                        "reflector", call_id, args.max_tokens, log_dir
                     )
                  
                     # generate after reflection (using generator_client)
-                    gen_prompt = generator_prompt.format(old_cheatsheet, reflection, question, context)
+                    gen_prompt = generator_prompt.format(cheatsheet, reflection, question, context)
                     
                     # Use timed LLM call with logging
-                    call_id = f"train_gen_after_reflect_{question_counts}_round_{i}"
+                    call_id = f"train_gen_after_reflect_{step}_round_{i}"
                     gen_response, call_info = timed_llm_call(
                         generator_client, generator_model, gen_prompt, 
-                        "generator", call_id, log_dir
+                        "generator", call_id, args.max_tokens, log_dir
                     )
                     final_answer = extract_answer(gen_response)
                     
@@ -807,91 +867,87 @@ def main():
 
             # DELTA APPROACH: Generate only the missing parts (using curator_client)
             if reflection != "(empty)":  # Only generate delta if there was a reflection
-                delta_prompt = delta_curator_prompt.format(old_cheatsheet, reflection, question)
+                delta_prompt = delta_curator_prompt.format(cheatsheet, reflection, question)
                 
                 # Use timed LLM call with logging
-                call_id = f"train_curator_{question_counts}"
+                call_id = f"train_curator_{step}"
                 delta_response, call_info = timed_llm_call(
                     curator_client, curator_model, delta_prompt, 
-                    "curator", call_id, log_dir
+                    "curator", call_id, args.max_tokens, log_dir
                 )
                 delta_dict = extract_delta_json(delta_response)
                 
                 print(f"Delta extracted: {delta_dict}")
                 
                 # Merge delta into existing cheatsheet
-                old_cheatsheet = merge_delta_to_cheatsheet(old_cheatsheet, delta_dict)
+                cheatsheet = merge_delta_to_cheatsheet(cheatsheet, delta_dict)
             
-            # Save intermediate cheatsheet every 20 samples (changed from 10)
-            if question_counts % 50 == 0:
-                intermediate_path = os.path.join(full_save_path, f"epoch_{epoch+1}_question_{question_counts}_cheatsheet.txt")
-                with open(intermediate_path, "w+") as f:
-                    f.write(old_cheatsheet)
-                print(f"Intermediate cheatsheet saved to {intermediate_path}")
-                
-            question_counts += 1
 
-        # EPOCH TRAINING EVALUATION
-        print(f"\n{'='*60}")
-        print(f"EPOCH {epoch + 1} TRAINING COMPLETED")
-        print(f"{'='*60}")
-        
-        # Process batched for XBRL finer
-        processed_answers, processed_targets = process_batched(epoch_answers, epoch_targets)
-        
-        # Calculate final training accuracy
-        all_target_types = list(set(processed_targets))
-        final_train_accuracy, _ = evaluate_accuracy(processed_answers, processed_targets, all_target_types)
-        
-        # EPOCH TEST EVALUATION (using generator_client)
-        test_results = {}
-        if test_samples:
-            test_results = evaluate_test_set(generator_client, generator_model, old_cheatsheet, test_samples, args.num_test_samples, log_dir)
-        
-        epoch_result = {
-            "epoch": epoch + 1,
-            "train_accuracy": final_train_accuracy,
-            "train_correct_count": epoch_correct,
-            "train_total_count": epoch_total,
-            "test_accuracy": test_results.get("processed_accuracy", 0),
-            "test_correct_count": test_results.get("correct_count", 0),
-            "test_total_count": test_results.get("total_count", 0),
-            "cheatsheet_length": len(old_cheatsheet),
-            "cheatsheet": old_cheatsheet
-        }
-        epoch_results.append(epoch_result)
-        
-        print(f"Epoch {epoch + 1} Results:")
-        print(f"  Training Accuracy: {final_train_accuracy:.3f} ({epoch_correct}/{epoch_total})")
-        if test_samples:
-            print(f"  Test Accuracy: {test_results['processed_accuracy']:.3f} ({test_results['correct_count']}/{test_results['total_count']})")
-        print(f"  Cheatsheet Length: {len(old_cheatsheet)} characters")
-        
-        # Save epoch final cheatsheet
-        epoch_cheatsheet_path = os.path.join(full_save_path, f"epoch_{epoch+1}_final_cheatsheet.txt")
-        with open(epoch_cheatsheet_path, "w+") as f:
-            f.write(old_cheatsheet)
-        
-        # Set cheatsheet for next epoch
-        current_cheatsheet = old_cheatsheet
-        
-        # Save epoch results
-        epoch_results_path = os.path.join(full_save_path, "epoch_results.json")
-        with open(epoch_results_path, "w") as f:
-            json.dump(epoch_results, f, indent=2)
+            if step % args.eval_steps == 0:
+                intermediate_path = os.path.join(full_save_path, f"epoch_{epoch+1}_question_{step}_cheatsheet.txt")
+                with open(intermediate_path, "w+") as f:
+                    f.write(cheatsheet)
+                print(f"Intermediate cheatsheet saved to {intermediate_path}")
+
+                # EVAL STEPS TRAINING EVALUATION
+                print(f"\n{'='*60}")
+                print(f"EPOCH {epoch + 1} {step} eval_steps TRAINING COMPLETED")
+                print(f"{'='*60}")
+
+                # Process batched for XBRL finer
+                processed_answers, processed_targets = process_batched(epoch_answers, epoch_targets)
+
+                # Calculate final training accuracy
+                all_target_types = list(set(processed_targets))
+                final_train_accuracy, _ = evaluate_accuracy(processed_answers, processed_targets, all_target_types)
+
+                # EPOCH TEST EVALUATION (using generator_client)
+                test_results = {}
+                if test_samples:
+                    test_results = evaluate_test_set(generator_client, generator_model, cheatsheet, test_samples, args.sample_ratio, args.max_tokens, log_dir)
+
+                result = {
+                    "epoch": epoch + 1,
+                    "eval_steps": step,
+                    "train_accuracy": final_train_accuracy,
+                    "train_correct_count": epoch_correct,
+                    "train_total_count": epoch_total,
+                    "test_accuracy": test_results.get("processed_accuracy", 0),
+                    "test_correct_count": test_results.get("correct_count", 0),
+                    "test_total_count": test_results.get("total_count", 0),
+                    "cheatsheet_length": len(cheatsheet),
+                    "cheatsheet": cheatsheet
+                }
+                results.append(result)
+
+                print(f"Epoch {epoch + 1} Eval_steps {step} Results:")
+                print(f"  Training Accuracy: {final_train_accuracy:.3f} ({epoch_correct}/{epoch_total})")
+                if test_samples:
+                    print(f"  Test Accuracy: {test_results['processed_accuracy']:.3f} ({test_results['correct_count']}/{test_results['total_count']})")
+                print(f"  Cheatsheet Length: {len(cheatsheet)} characters")
+
+                # Save epoch final cheatsheet
+                epoch_cheatsheet_path = os.path.join(full_save_path, f"epoch_{epoch+1}_final_cheatsheet.txt")
+                with open(epoch_cheatsheet_path, "w+") as f:
+                    f.write(cheatsheet)
+
+                # Save epoch results
+                results_path = os.path.join(full_save_path, "results.json")
+                with open(results_path, "w") as f:
+                    json.dump(results, f, indent=2)
+
+            # FINAL SUMMARY
+            print(f"\n{'='*60}")
+            print(f"TRAINING SUMMARY")
+            print(f"{'='*60}")
     
-    # FINAL SUMMARY
-    print(f"\n{'='*60}")
-    print(f"TRAINING SUMMARY")
-    print(f"{'='*60}")
-    
-    for i, result in enumerate(epoch_results):
-        print(f"Epoch {result['epoch']}:")
+    for i, result in enumerate(results):
+        print(f"Epoch {result['epoch']} Eval Steps {result['eval_steps']}:")
         print(f"  Train Accuracy: {result['train_accuracy']:.3f} ({result['train_correct_count']}/{result['train_total_count']})")
         print(f"  Test Accuracy:  {result['test_accuracy']:.3f} ({result['test_correct_count']}/{result['test_total_count']})")
         if i > 0:
-            prev_train = epoch_results[i-1]['train_accuracy']
-            prev_test = epoch_results[i-1]['test_accuracy']
+            prev_train = results[i-1]['train_accuracy']
+            prev_test = results[i-1]['test_accuracy']
             train_improvement = result['train_accuracy'] - prev_train
             test_improvement = result['test_accuracy'] - prev_test
             print(f"  Train Improvement: {train_improvement:+.3f}")
@@ -904,9 +960,9 @@ def main():
         "run_info": config_info,
         "num_epochs": args.num_epochs,
         "num_train_samples_per_epoch": len(all_samples),
-        "num_test_samples_per_epoch": args.num_test_samples,
-        "epoch_results": epoch_results,
-        "final_cheatsheet_length": len(current_cheatsheet)
+        "sample_ratio": args.sample_ratio,
+        "results": results,
+        "final_cheatsheet_length": len(cheatsheet)
     }
     
     with open(summary_path, "w") as f:
@@ -915,10 +971,10 @@ def main():
     # Save final cheatsheet
     final_cheatsheet_path = os.path.join(full_save_path, "final_cheatsheet.txt")
     with open(final_cheatsheet_path, "w") as f:
-        f.write(current_cheatsheet)
+        f.write(cheatsheet)
     
     print(f"Results saved to: {full_save_path}")
-    print(f"Final cheatsheet length: {len(current_cheatsheet)} characters")
+    print(f"Final cheatsheet length: {len(cheatsheet)} characters")
 
 
 if __name__=="__main__":
