@@ -1,0 +1,48 @@
+1. DisposalGroupIncludingDiscontinuedOperationConsideration: The disposal group including discontinued operation consideration is the consideration recognized for the disposal of a group of assets and liabilities.
+2. RestructuringCharges: The restructuring charges are the costs associated with restructuring that are recognized as expenses when incurred.
+3. BusinessCombinationRecognizedIdentifiableAssetsAcquiredAndLiabilitiesAssumedIntangibles: The identifiable assets acquired and liabilities assumed in a business combination are recognized at their fair value.
+4. PropertyPlantAndEquipmentUsefulLife: The useful life of property, plant, and equipment is the period over which the asset is expected to be used.
+5. GoodwillImpairmentLoss: The goodwill impairment loss is the excess of the carrying value of goodwill over its implied fair value.
+6. CumulativeEffectOfNewAccountingPrincipleInPeriodOfAdoption: The cumulative effect of a new accounting principle in the period of adoption is the effect of the new principle on the financial statements.
+7. SaleOfStockNumberOfSharesIssuedInTransaction: The number of shares issued in a transaction is the number of shares sold or issued in a specific transaction.
+8. PaymentsToAcquireBusinessesNetOfCashAcquired: The payments to acquire businesses net of cash acquired are the consideration paid for the business combination.
+9. AssetImpairmentCharges: The asset impairment charges are the losses recognized for the impairment of assets.
+10. BusinessCombinationConsiderationTransferred: The consideration transferred in a business combination is the consideration paid by the acquirer to the target in a business combination.
+11. PaymentsToAcquireBusinesses: The payments to acquire businesses are the gross payments made to acquire businesses.
+12. CommonStockDividendsPerShareDeclared: The common stock dividends declared per share is the common stock dividends declared per share.
+13. RepaymentsOfDebt: The repayments of debt are the repayments of debt.
+14. LineOfCreditFacilityCurrentBorrowingCapacity: The current borrowing capacity of a line of credit facility is the current borrowing capacity of a line of credit facility.
+15. LineOfCreditFacilityRemainingBorrowingCapacity: The remaining borrowing capacity of a line of credit facility is the remaining borrowing capacity of a line of credit facility.
+16. LettersOfCreditOutstandingAmount: The outstanding amount of a letter of credit is the outstanding amount of a letter of credit.
+17. RestructuringCharges: The restructuring charges are the costs associated with restructuring that are recognized as expenses when incurred.
+18. IncomeTaxExpenseBenefitTRS: The income tax expense (benefit) recognized by the TRS is the tax expense recognized for the tax expense (benefit) by the TRS.
+19. AllocatedShareBasedCompensationExpenseTRS: The allocated share-based compensation expense recognized by the TRS is the expense recognized for share-based compensation awards granted to employees by the TRS.
+20. EffectiveIncomeTaxRateReconciliationAtFederalStatutoryIncomeTaxRateTRS: The effective income tax rate reconciliation at federal statutory income tax rate recognized by the TRS is the reconciliation of the effective income tax rate to the federal statutory income tax rate recognized by the TRS.
+21. OperatingLeasesRentExpenseNet: The operating lease rent expense (net) is the expense recognized for operating leases.
+22. DefinedContributionPlanCostRecognized: The defined contribution plan cost recognized is the cost recognized for defined contribution plans.
+23. USGAAPTags: The US GAAP tags are the standardized tags used to identify and classify financial information.
+24. LossContingencyAccrualAtCarryingValue: The loss contingency accrual at carrying value is the accrual recognized for loss contingencies.
+25. AccrualForEnvironmentalLossContingencies: The accrual for environmental loss contingencies is the accrual recognized for environmental loss contingencies.
+26. OperatingLeasesRentExpenseNet: The operating lease rent expense (net) is the expense recognized for operating leases.
+27. ShareBasedCompensationArrangementByShareBasedPaymentAwardNumberOfSharesAvailableForGrant: The number of shares available for future share-based compensation grants.
+28. ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsGrantsInPeriodWeightedAverageGrantDateFairValue: The weighted-average grant-date fair value of options granted during the years ended December 31, 2017, 2016, and 2015 was $6.79, $6.79, and $6.53, respectively.
+29. ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsGrantsInPeriodWeightedAverageGrantDateFairValue: The weighted-average grant-date fair value of options granted during the years ended December 31, 2017, 2016, and 2015 was $6.79, $6.79, and $6.53, respectively.
+30. EmployeeServiceShareBasedCompensationNonvestedAwardsTotalCompensationCostNotYetRecognizedPeriodForRecognition1: Total unrecognized compensation expense of $19.7 million related to options will be recognized over a weighted-average period of 2.5 years.
+31. ShareBasedCompensationArrangementByShareBasedPaymentAwardEquityInstrumentsOtherThanOptionsVestedInPeriodTotalFairValue: The total fair value of restricted stock awards vested during the years ended December 31, 2017, 2016, and 2015 was approximately $2.7 million, $3.3 million, and $750,000 respectively.
+32. AcquiredFiniteLivedIntangibleAssetsWeightedAverageUsefulLife: The weighted-average useful life of acquired finite-lived intangible assets.
+33. LongTermDebtFairValue: The fair value of long-term debt is the value of the debt at a specific point in time.
+34. NumberOfOperatingSegments: The number of operating segments is the number of segments that the company operates.
+35. RevenueRemainingPerformanceObligation: The revenue remaining performance obligation is the revenue that has not yet been recognized.
+36. AntidilutiveSecuritiesExcludedFromComputationOfEarningsPerShareAmount: The antidilutive securities excluded from computation of earnings per share amount is the number of securities that are antidilutive.
+37. UnrecognizedTaxBenefits: The unrecognized tax benefits are the tax benefits that have not been recognized.
+38. RelatedPartyTransactionExpensesFromTransactionsWithRelatedParty: The related party transaction expenses from transactions with related party are the expenses recognized for transactions with related parties.
+39. RelatedPartyTransactionExpensesFromTransactionsWithRelatedParty: The related party transaction expenses from transactions with related party are the expenses recognized for transactions with related parties.
+40. RelatedPartyTransactionExpensesFromTransactionsWithRelatedParty: The related party transaction expenses from transactions with related party are the expenses recognized for transactions with related parties.
+41. PaymentsToAcquireBusinessesGross: The gross payments made to acquire businesses.
+42. BusinessCombinationAcquisitionRelatedCosts: The costs associated with the acquisition of a business, including working capital adjustments and transaction costs.
+43. BusinessCombinationAcquisitionRelatedCosts: The costs associated with the acquisition of a business, including working capital adjustments and transaction costs.
+44. BusinessCombinationAcquisitionRelatedCosts: The costs associated with the acquisition of a business, including working capital adjustments and transaction costs.
+45. EffectiveIncomeTaxRateReconciliationAtFederalStatutoryIncomeTaxRate: The effective income tax rate reconciliation at federal statutory income tax rate is the reconciliation of the effective income tax rate to the federal statutory income tax rate.
+46. LossContingencyPendingClaimsNumber: The number of pending claims related to a loss contingency.
+47. Goodwill: The excess of the cost of an acquired business over the fair value of its net assets.
+48. AmortizationOfIntangibleAssets: The expense recognized for the amortization of intangible assets.

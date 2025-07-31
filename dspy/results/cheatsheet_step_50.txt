@@ -1,0 +1,32 @@
+1. DisposalGroupIncludingDiscontinuedOperationConsideration: The disposal group including discontinued operation consideration is the consideration recognized for the disposal of a group of assets and liabilities.
+2. RestructuringCharges: The restructuring charges are the costs associated with restructuring that are recognized as expenses when incurred.
+3. BusinessCombinationRecognizedIdentifiableAssetsAcquiredAndLiabilitiesAssumedIntangibles: The identifiable assets acquired and liabilities assumed in a business combination are recognized at their fair value.
+4. BusinessAcquisitionPercentageOfVotingInterestsAcquired: The percentage of voting interests acquired in a business combination is a key component of the business combination.
+5. PaymentsToAcquireBusinessesNetOfCashAcquired: The payments to acquire businesses net of cash acquired are the consideration paid for the business combination.
+6. AssetImpairmentCharges: The asset impairment charges are the losses recognized for the impairment of assets.
+7. BusinessCombinationConsiderationTransferred: The consideration transferred in a business combination is the consideration paid by the acquirer to the target in a business combination.
+8. PaymentsToAcquireBusinesses: The payments to acquire businesses are the gross payments made to acquire businesses.
+9. CommonStockDividendsPerShareDeclared: The common stock dividends declared per share is the common stock dividends declared per share.
+10. RepaymentsOfDebt: The repayments of debt are the repayments of debt.
+11. LineOfCreditFacilityCurrentBorrowingCapacity: The current borrowing capacity of a line of credit facility is the current borrowing capacity of a line of credit facility.
+12. LineOfCreditFacilityRemainingBorrowingCapacity: The remaining borrowing capacity of a line of credit facility is the remaining borrowing capacity of a line of credit facility.
+13. LettersOfCreditOutstandingAmount: The outstanding amount of a letter of credit is the outstanding amount of a letter of credit.
+14. RestructuringCharges: The restructuring charges are the costs associated with restructuring that are recognized as expenses when incurred.
+15. IncomeTaxExpenseBenefitTRS: The income tax expense (benefit) recognized by the TRS is the tax expense recognized for the tax expense (benefit) by the TRS.
+16. AllocatedShareBasedCompensationExpenseTRS: The allocated share-based compensation expense recognized by the TRS is the expense recognized for share-based compensation awards granted to employees by the TRS.
+17. EffectiveIncomeTaxRateReconciliationAtFederalStatutoryIncomeTaxRateTRS: The effective income tax rate reconciliation at federal statutory income tax rate recognized by the TRS is the reconciliation of the effective income tax rate to the federal statutory income tax rate recognized by the TRS.
+18. OperatingLeasesRentExpenseNet: The operating lease rent expense (net) is the expense recognized for operating leases.
+19. DefinedContributionPlanCostRecognized: The defined contribution plan cost recognized is the cost recognized for defined contribution plans.
+20. USGAAPTags: The US GAAP tags are the standardized tags used to identify and classify financial information.
+21. LossContingencyAccrualAtCarryingValue: The loss contingency accrual at carrying value is the accrual recognized for loss contingencies.
+22. AccrualForEnvironmentalLossContingencies: The accrual for environmental loss contingencies is the accrual recognized for environmental loss contingencies.
+23. OperatingLeasesRentExpenseNet: The operating lease rent expense (net) is the expense recognized for operating leases.
+24. ShareBasedCompensationArrangementByShareBasedPaymentAwardNumberOfSharesAvailableForGrant: The number of shares available for future share-based compensation grants.
+25. ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsGrantsInPeriodWeightedAverageGrantDateFairValue: The weighted-average grant-date fair value of stock options and SARs granted.
+26. InterestExpense: The interest expense is the cost of borrowing.
+27. IncomeTaxExpenseBenefit: The income tax expense (benefit) is the tax expense recognized for the tax expense (benefit).
+28. BusinessCombinationRecognizedIdentifiableAssetsAcquiredAndLiabilitiesAssumedIntangibles: The identifiable assets acquired and liabilities assumed in a business combination are recognized at their fair value.
+29. AcquiredFiniteLivedIntangibleAssetsWeightedAverageUsefulLife: The weighted-average useful life of acquired finite-lived intangible assets.
+30. AcquiredFiniteLivedIntangibleAssetsWeightedAverageUsefulLife: The weighted-average useful life of acquired finite-lived intangible assets.
+31. AcquiredFiniteLivedIntangibleAssetsWeightedAverageUsefulLife: The weighted-average useful life of acquired finite-lived intangible assets.
+32. LongTermDebtFairValue: The fair value of long-term debt is the value of the debt at a specific point in time.
